@@ -36,7 +36,7 @@ ShadowQuery is a tiny (1.5k uglified gzip as of this writing) utility library to
 </html>
 ```
 This works as is in Chrome, for other browsers you may need to load polyfills until they fully support the standart. Everything that starts with `$` above is ShadowQuery, the rest ist standart tech. The result of the above is:
-### Greetings
+### Greetings!
 * Hello Angular!
 * Hello React!
 * Hello Vue!
