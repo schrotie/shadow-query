@@ -3,6 +3,44 @@ Nano sized utilities library for writing vanilla web components
 
 ShadowQuery is a tiny (1.5k uglified gzip as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
 
+```html
+<!DOCTYPE html>
+<html>
+	<head><script type="module">
+		import {$} from '/node_modules/shadow-query/shadowQuery.js';
+
+		const template = `
+		<style>:host {cursor: pointer; font-family: sans-serif;}</style>
+		<h3><slot></slot></h3>
+		<ul></ul>
+		`;
+		const listItem = `<li> </li>`;
+
+		window.customElements.define('hello-world', class extends HTMLElement {
+			constructor() {
+				super();
+				$.template(this, {'default': template, listItem});
+				$(this).on('click', () => alert('ShadowQuery loves you!'));
+			}
+			connectedCallback() {
+				this.attachShadow({mode: 'open'}).appendChild(this.template);
+				$(this, 'ul').childArray({
+					array   : $(this, ':host').attr('greet').split(' '),
+					template: (        ) => this.getTemplate('listItem'),
+					update  : (li, item) => li.text(`Hello ${item}!`),
+				});
+			}
+		});
+	</script></head>
+	<body><hello-world greet="Angular React Vue">Greetings!</hello-world></body>
+</html>
+```
+This works as is in Chrome, for other browsers you may need to load polyfills until they fully support the standart. Everything that starts with `$` above is ShadowQuery, the rest ist standart tech. The result of the above is:
+### Greetings
+* Hello Angular!
+* Hello React!
+* Hello Vue!
+
 # Status
 
 ShadowQuery is currently a proof of concept. I have developed one smallish (1.5k lines) web application on it. No tests, no proven tech, an experiment.
