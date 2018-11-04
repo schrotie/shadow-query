@@ -165,7 +165,7 @@ document.registerElement('hello-world', class extends HTMLElement {
 	}
 	_onHello() {
 		console.log($(this, ':host').attr('hello')); // -> “world?”
-		$(this).attr('hello', 'world!');
+		$(this, ':host').attr('hello', 'world!');
 		console.log($(this, ':host').attr('hello')); // -> “world!”
 	}
 });
