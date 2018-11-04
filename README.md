@@ -66,9 +66,7 @@ There are two types of APIs in ShadowQuery. There are static methods like `$.tem
 
 jQuery works on the document, ShadowQuery is for web components which work on document-fragments. Thus all ShadowQuery methods expect an entry node (or several) as first argument.
 
-## Component Helpers
-
-### Templates
+## Templates
 
 You already saw this in the hello world example. `$.template` creates the `this.template` getter and the `this.getTemplate` method. Instead of just passing a string to `$.template` you can also pass an object, if you need more than one template. One of the templates must be `'default'` if you want to use `this.template`:
 
@@ -81,38 +79,7 @@ constructor() {
 
 Now you can do `this.getTemplate('deferredTemplate')` if you want to attach something to your DOM at a later point ... we'll come to that.
 
-### Properties
-
-When your web component has custom properties, it will usually want to react to changes of the properties. To this end you implement setter methods. Now it can happen that something instantiates your element and sets a property _before_ your element is registered. In these cases the property will be written as an instance property _over_ the setter method (which comes later!). This is a trivial problem but easy to miss and somewhat tedious to work around. ShadowQuery to the rescue:
-
-```js
-constructor() {
-	super();
-	$.properties({hello: 'Hello world!');
-	console.log(this.hello); // -> 'Hello world!'
-}
-```
-Do `$.properties({hello: undefined)};` to bypass default value initialization, but still keep up with properties set before registration.
-
-
-### Changes
-
-```js
-if($.changed(this, {key: value})) doSomething();
-```
-This will create `this._shadowQueryChange = {}` and track changes there. It calls `JSON.stringify(value)` and stores that under `key` for later comparison.
-
-
-### Recursive Events
-
-Quite often an event handler changes something and directly or indirectly triggers the event, that it handles. To break this recursion:
-```js
-this.addEventListener('click', $.noSelf(this._handleEvent.bind(this)));
-```
-
-## DOM Helpers
-
-### Text Values and Chaining
+## Text Values and Chaining
 
 So far didn't look like jQuery at all, I know. We're getting there:
 
@@ -152,7 +119,7 @@ You may also use zero-width-space: `&#8203;`. This is an important point: if you
 So the example first calls `text`, which like all the DOM utilities returns a chainable reference to itself in most cases. If you call `text` without arguments, it will return the text of the first matched element (like jQuery). Here we manipulate, though, and get a chainable result on which (i.e. on the same `span` element in this case) on which `toggleClass` is called. `toggleClass` is like jQuerie's `toggleClass`, but it is just a shorthand for `node.classList.toggle`. If your browser does not support `classList` (_you know who ..._) you're screwed. Well, actually you're not screwed but required to load the respective polyfill. But you know, no nanny and blah ...
 
 
-### Component Attributes
+## Component Attributes
 
 In many cases web components interface with their surroundings through attributes. ShadowQuery helps with that:
 
@@ -176,7 +143,7 @@ document.registerElement('hello-world', class extends HTMLElement {
 There's a gotcha here: When you pass a node to `$` ShadowQuery selects its `shadowRoot` by default. In most cases, that's what you want, register event handlers on shadow DOM, traverse and manipulate it. In the cases where you don't want that, i.e. when you want to work with the host node, you have to explicitly select it using the `:host` selector. Note that in the constructor this is not necessary, since that is always called before the `shadowRoot` is attached.
 
 
-### Arrays
+## Arrays
 
 This is somewhat of an acid test for code dealing with web components: every once in a while you need to render data that comes in an array and now you need to somehow iterate it and create DOM from it. If you used `innerHTML = template`, this is where you break, because a scrolled view will jump to the top if you do this. Here's ShadowQuery's take on the matter. This is also a slightly more involved example that brings together several features of ShadowQuery:
 ```js
@@ -214,5 +181,12 @@ Result:
 
 # More
 
-`childArray` can do it bit more, chunked rendering for example. For this and a few more helpers/features please refer to the API reference.
+`childArray` can do it bit more, chunked rendering for example. For this and a more helpers/features please refer to the API reference. To view it:
+```sh
+git clone https://github.com/schrotie/shadow-query
+cd shadow-query
+npm install
+npm run-script build-doc
+```
+And then open shadow-query/documentation/index.html in your browser.
 
