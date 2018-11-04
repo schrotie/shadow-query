@@ -1,6 +1,6 @@
 {
 	"name": "shadow-query",
-	"version": "0.0.1",
+	"version": "0.0.3",
 	"license": "MIT",
 	"author":{
 		"name" : "Thorsten Roggendorf",
@@ -12,6 +12,10 @@
 	"bugs":{
 		"url" : "https://github.com/shrotie/shadow-query/issues",
 		"email" : "junk@shrotie.de"
+	},
+	"repository":{
+		"type": "git",
+		"url": "https://github.com/schrotie/shadow-query"
 	},
 	"files": ["shadowQuery.js"],
 	"browser":"shadowQuery.js",
