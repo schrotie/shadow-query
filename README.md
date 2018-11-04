@@ -178,7 +178,7 @@ There's a gotcha here: When you pass a node to `$` ShadowQuery selects its `shad
 
 ### Arrays
 
-This is somewhat of an acid test for code dealing with web components: every once in a while you need to render data that comes in an array and now you need to somehow iterate it and create DOM from it. If you used `interHTML = template`, this is where you break, because a scrolled view will jump to the top if you do this. Here's ShadowQuery's take on the matter. This is also a slightly more involved example that brings together several features of ShadowQuery:
+This is somewhat of an acid test for code dealing with web components: every once in a while you need to render data that comes in an array and now you need to somehow iterate it and create DOM from it. If you used `innerHTML = template`, this is where you break, because a scrolled view will jump to the top if you do this. Here's ShadowQuery's take on the matter. This is also a slightly more involved example that brings together several features of ShadowQuery:
 ```js
 const template = '<ul></ul>';
 const listitem = '<li> </li>'; // Space -> textNode!
@@ -196,7 +196,7 @@ document.registerElement('hello-framework', class extends HTMLElement {
 	}
 
 	_update() {
-		$(this, 'ul').nodeArray({
+		$(this, 'ul').childArray({
 			array:    $(this, ':host').attr('greet').split(),
 			template: () => this.getTemplate('listitem'),
 			update:   (li, item) => li.text(`Hello ${item}!`),
@@ -214,5 +214,5 @@ Result:
 
 # More
 
-`nodeArray` can do it bit more, chunked rendering for example. For this and a few more helpers/features please refer to the API reference.
+`childArray` can do it bit more, chunked rendering for example. For this and a few more helpers/features please refer to the API reference.
 
