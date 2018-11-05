@@ -23,7 +23,7 @@ customElements.define('sq-monster', class extends HTMLElement {
 	constructor() {super(); $.template(this, sqTemplate);}
 	connectedCallback() {
 		this.attachShadow({mode: 'open'}).appendChild(this.template);
-		$(this, 'sq-slider');
+		this._$slider = $(this, 'sq-slider');
 		this._data = iniData();
 		this._table = $(this, 'sq-table')[0];
 		this._table.data = this._data;
@@ -31,7 +31,7 @@ customElements.define('sq-monster', class extends HTMLElement {
 		setTimeout(() => this._update());
 	}
 	_update() {
-		randomize(this._data, Number($(this, 'sq-slider').attr('entropy')));
+		randomize(this._data, Number(this._$slider.attr('entropy')));
 		this._table.update();
 		this._stats.update();
 		setTimeout(() => this._update());
@@ -89,7 +89,7 @@ customElements.define('sq-slider', class extends HTMLElement {
 	constructor() {super(); $.template(this, sliderTemplate);}
 	connectedCallback() {
 		this.attachShadow({mode: 'open'}).appendChild(this.template);
-		$(this, 'input').on('change', this._update.bind(this));
+		$(this, 'input').on('input', this._update.bind(this));
 		this._update();
 	}
 	_update() {
@@ -235,18 +235,18 @@ customElements.define('sq-stats', class extends HTMLElement {
 	constructor() {super(); $.template(this, statsTemplate);}
 	connectedCallback() {
 		this.attachShadow({mode: 'open'}).appendChild(this.template);
-		this._fps = $(this, 'div:nth-child(2) span');
-		this._mem = $(this, 'div:nth-child(3) span');
+		this._$fps = $(this, 'div:nth-child(2) span');
+		this._$mem = $(this, 'div:nth-child(3) span');
 		this._samples = 0;
 	}
 	update() {
 		const p = performance;
-		if(p.memory) {
-			this._mem.text(`${(p.memory.totalJSHeapSize / 1000000).toFixed(2)}MB`);
-		}
+		if(p.memory) {this._$mem.text(
+			`${(p.memory.totalJSHeapSize / 1000000).toFixed(2)}MB`
+			);}
 		const s = Math.floor((new Date()).getTime() / 1000);
 		if(this._previousSecond && (s !== this._previousSecond)) {
-			this._fps.text(this._samples);
+			this._$fps.text(this._samples);
 			this._samples = 0;
 		}
 		this._previousSecond = s;
