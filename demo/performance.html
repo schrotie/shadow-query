@@ -15,13 +15,13 @@ if (!window.perfMonitor) {
 		initProfiler: function () {},
 		startFPSMonitor: function () {},
 		startMemMonitor: function () {},
-		startProfile: function () {}
+		startProfile: function () {},
 	};
 }
 perfMonitor.startFPSMonitor();
 perfMonitor.startMemMonitor();
 // perfMonitor.initProfiler('data update');
-perfMonitor.initProfiler('view update');
+// perfMonitor.initProfiler('view update');
 
 
 const sqTemplate = `
@@ -41,18 +41,18 @@ customElements.define('sq-monster', class extends HTMLElement {
 	constructor() {super(); $.template(this, sqTemplate);}
 	connectedCallback() {
 		this.attachShadow({mode: 'open'}).appendChild(this.template);
-		$(this, 'sq-slider')
+		$(this, 'sq-slider');
 		this._data = iniData();
-		this._table = $(this, 'sq-table')[0]
-		this._stats = $(this, 'sq-stats')[0]
+		this._table = $(this, 'sq-table')[0];
+		this._table.data = this._data;
+		this._stats = $(this, 'sq-stats')[0];
 		setTimeout(() => this._update());
 	}
 	_update() {
 		randomize(this._data, Number($(this, 'sq-slider').attr('entropy')));
-		perfMonitor.startProfile('view update');
-		this._table.data = this._data;
+//		perfMonitor.startProfile('view update');
 		this._table.update();
-		perfMonitor.endProfile('view update');
+//		perfMonitor.endProfile('view update');
 		setTimeout(() => this._update());
 	}
 });
@@ -60,18 +60,24 @@ customElements.define('sq-monster', class extends HTMLElement {
 function iniData() {
 	const arr = [];
 	for(let i = 1; i < 51; i++) {
-		arr.push([`cluster${i}`      , 0, 0, 0, 0, 0, 0]);
-		arr.push([`cluster${i} slave`, 0, 0, 0, 0, 0, 0]);
+		arr.push([`cluster${i}`      , {}, {}, {}, {}, {}, {}]);
+		arr.push([`cluster${i} slave`, {}, {}, {}, {}, {}, {}]);
 	}
 	return arr;
 }
 
 function randomize(data, entropy) {
 	for(let row of data) {
-		if(Math.random() < entropy) row[1] = Math.round(Math.random() * 10);
+		if(Math.random() < entropy) row[1].v = Math.round(Math.random() * 10);
 		for(var i = 2; i < row.length; i++) {
 			if(Math.random() > entropy) continue;
-			row[i] = (Math.random() * 15).toPrecision(2);
+			const v = (Math.random() * 15).toFixed(2);
+			row[i].v = v;
+			row[i].w = Math.random() < 0.5;
+			const q = Math.random();
+			if(     q >= 0.2) row[i].q = 'SELECT blah FROM something';
+			else if(q <  0.1) row[i].q = 'vacuum';
+			else              row[i].q = '<IDLE> in transaction';
 		}
 	}
 }
@@ -119,6 +125,7 @@ const tableTemplate = `
 		border-collapse: collapse;
 		border-spacing: 0;
 		table-layout: fixed;
+		font-size: 75%;
 	}
 	tr {
 	}
@@ -128,26 +135,64 @@ const tableTemplate = `
 		line-height: 1.42857143;
 		padding: 8px;
 		vertical-align: top;
+		position: relative;
 	}
-	td:nth-child(2) {color: #5cb85c;}
-	td.warn {color: #f0ad4e;}
+	td > div {
+		display: none;
+	}
+	td:hover > div {
+		display: block;
+		left: -100%;
+		width: 100%;
+		margin-left: -10px;
+		background-color: #fff;
+		background-clip: padding-box;
+		border: 1px solid rgba(0,0,0,.2);
+		border-radius: 6px;
+		box-shadow: 0 5px 10px rgba(0,0,0,.2);
+		max-width: 276px;
+		padding: 1px;
+		position: absolute;
+		text-align: left;
+		top: 0;
+		white-space: normal;
+		z-index: 1010;
+		padding: 9px 14px;
+	}
+	div:after {
+		content: "";
+		top: calc(50% - 5px);
+		right: -7px;
+		width: 10px;
+		height: 10px;
+		position: absolute;
+		background: white;
+		transform: rotate(45deg);
+		border: 1px solid rgba(0, 0, 0, 0.2);
+		border-bottom: 0 none transparent;
+		border-left: 0 none transparent;
+	}
+	span {
+		background: #5cb85c;
+		border-radius: .25em;
+		color: #fff;
+		font-weight: 700;
+		line-height: 1;
+		padding: .2em .6em .3em;
+		text-align: center;
+		vertical-align: baseline;
+	}
+	span.warn {background: #f0ad4e;}
 </style>
 <table></table>
 `;
-const  rowTemplate = `<tr></tr>`;
-const cellTemplate = `<td> </td>`;
+const  rowTemplate = `<tr><td> </td><td><span> </span></td><td> <div> </div></td><td> <div> </div></td><td> <div> </div></td><td> <div> </div></td><td> <div> </div></td></tr>`;
 
 customElements.define('sq-table', class extends HTMLElement {
 	constructor() {
 		super();
-		$.template(this, {
-			'default':tableTemplate,
-			row: rowTemplate,
-			cell: cellTemplate
-		});
-		this.data = iniData();
+		$.template(this, {'default':tableTemplate, row: rowTemplate});
 		this._updateRow  = this._updateRow .bind(this);
-		this._updateCell = this._updateCell.bind(this);
 	}
 	connectedCallback() {
 		this.attachShadow({mode: 'open'}).appendChild(this.template);
@@ -156,19 +201,22 @@ customElements.define('sq-table', class extends HTMLElement {
 		$(this, 'table').childArray({
 			array: this.data,
 			template: () => this.getTemplate('row'),
-			update: this._updateRow
+			update: this._updateRow,
 		});
 	}
 	_updateRow(row, data) {
-		row.childArray({
-			array: data,
-			template: () => this.getTemplate('cell'),
-			update: this._updateCell
-		});
-	}
-	_updateCell(cell, data, index) {
-		cell.text(data);
-		if(index === 1) cell.toggleClass('warn', data === 10);
+		row = row[0];
+		for(let i = 0; i < data.length; i++) {
+			if(!i) row.childNodes[i].childNodes[0].nodeValue = data[i];
+			else if(i === 1) {
+				row.childNodes[i].childNodes[0].childNodes[0].nodeValue = data[i].v;
+			}
+			else {
+				row.childNodes[i].childNodes[0].nodeValue = data[i].v;
+				row.childNodes[i].childNodes[1].childNodes[0].nodeValue = data[i].q;
+			}
+		}
+		row.childNodes[1].childNodes[0].classList.toggle('warn', data[1].v === 10);
 	}
 });
 
