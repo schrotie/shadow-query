@@ -105,9 +105,7 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining
 	 */
 	childArray(opt) {
-		for(let node of this) attachNodeArray(
-			node, opt
-		);
+		for(let node of this) attachNodeArray(node, opt);
 		return this;
 	}
 
@@ -251,9 +249,9 @@ export class ShadowQuery extends Array {
 			return this[0] && this[0].childNodes[0] &&
 				this[0].childNodes[0].nodeValue;
 		}
-		for(let node of this) if(node.childNodes[0]) {
+		for(let node of this) {if(node.childNodes[0]) {
 			node.childNodes[0].nodeValue = t;
-		}
+		}}
 		return this;
 	}
 

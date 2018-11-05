@@ -3,7 +3,7 @@ Nano sized utilities library for writing vanilla web components
 
 ShadowQuery is a tiny (1.5k uglified gzip as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
 
-__Tiny__: demo/dbmonster.html is a selfcontained HTML app (load without server into your Chrome, for other browser you'd need to add polyfills) _below 10K_.
+__Tiny__: demo/dbmonster.html is a selfcontained HTML app _below 10K_ (load without server into your Chrome or Firefox, for other browsers you may need to add more polyfills).
 
 __High Performance__: shadow-query dbmonster ist among the fastest dbmonsters out there, one of the lowest memory footprints.
 
