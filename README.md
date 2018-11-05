@@ -6,6 +6,7 @@ ShadowQuery is a tiny (1.5k uglified gzip as of this writing) utility library to
 __Tiny__: demo/dbmonster.html is a selfcontained HTML app (load without server into your Chrome, for other browser you'd need to add polyfills) _below 10K_.
 
 __High Performance__: shadow-query dbmonster ist among the fastest dbmonsters out there, one of the lowest memory footprints.
+
 ... _and all that at 100 lines of nicely structured code plus templates_
 
 ```html
