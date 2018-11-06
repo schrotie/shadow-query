@@ -28,7 +28,7 @@ customElements.define('sq-monster', class extends HTMLElement {
 		this._table = $(this, 'sq-table')[0];
 		this._table.initialize(this._data);
 		this._stats = $(this, 'sq-stats')[0];
-		setTimeout(() => this._update());
+		this._update();
 	}
 	_update() {
 		randomize(this._data, Number(this._$slider.attr('entropy')));
@@ -229,9 +229,14 @@ const statsTemplate = `
 		padding: 0.5rem;
 		font-family: monospace;
 	}
+	div {display: flex;}
 	label {
 		display: inline-block;
 		width: 3rem;
+	}
+	span {
+		text-align: right;
+		flex: 1 1 auto;
 	}
 </style>
 <div><label>FPS:</label><span> </span></div>
@@ -247,17 +252,27 @@ customElements.define('sq-stats', class extends HTMLElement {
 		this._samples = 0;
 	}
 	update() {
-		const p = performance;
-		if(p.memory) {this._$mem.text(
-			`${(p.memory.totalJSHeapSize / 1000000).toFixed(2)}MB`
-			);}
-		const s = Math.floor((new Date()).getTime() / 1000);
-		if(this._previousSecond && (s !== this._previousSecond)) {
+		const second = Math.floor((new Date()).getTime() / 1000);
+		if(this._previousSecond && (second !== this._previousSecond)) {
 			this._$fps.text(this._samples);
+			this._$mem.text(this._memory);
 			this._samples = 0;
 		}
-		this._previousSecond = s;
+		this._previousSecond = second;
 		this._samples++;
+	}
+	get _memory() {
+		const p = performance;
+		if(!p.memory) return 'n/a';
+		const bytes = p.memory.usedJSHeapSize;
+		if (bytes == 0) return 'n/a';
+		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+		const nFractDigit = 2;
+		const precision   = Math.pow(10, nFractDigit);
+		const i           = Math.floor(Math.log(bytes) / Math.log(1024));
+		return Math.round(
+			bytes*precision / Math.pow(1024, i)
+		) / precision + ' ' + sizes[i];
 	}
 });
 		</script>
