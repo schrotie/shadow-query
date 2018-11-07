@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head><script type="module">
+		import {$} from '../shadowQuery.js';
+
+		const template = `
+		<style>:host {cursor: pointer; font-family: sans-serif;}</style>
+		<h3><slot></slot></h3>
+		<ul></ul>
+		`;
+		const listItem = `<li> </li>`;
+
+		window.customElements.define('hello-world', class extends HTMLElement {
+			constructor() {
+				super();
+				$.template(this, {
+					'default': template,
+					listItem,
+					list: {
+						array   : $(this, ':host').attr('greet').split(' '),
+						template: 'listItem',
+						update  : (li, item) => li.text(`Hello ${item}!`),
+					}
+				});
+				$(this).on('click', () => alert('ShadowQuery loves you!'));
+			}
+			connectedCallback() {
+				this.attachShadow({mode: 'open'}).appendChild(this.template);
+				$(this, 'ul').append(this.getTemplate('list'));
+			}
+		});
+	</script></head>
+	<body><hello-world greet="Angular React Vue">Greetings!</hello-world></body>
+</html>

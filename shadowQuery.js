@@ -31,7 +31,7 @@ export class ShadowQuery extends Array {
 		let array;
 		if(Array.isArray(node)) array = node; // node.map(shadow);
 		else if(node instanceof ShadowQuery) array = node;
-		else if(node instanceof NodeList) {
+		else if(node instanceof NodeList || node instanceof HTMLCollection) {
 			array = [];
 			for(var i = 0; i < node.length; i++) array.push(node[i]);
 		}
@@ -46,6 +46,11 @@ export class ShadowQuery extends Array {
 	 */
 	addClass(className) {
 		for(let node of this) node.classList.add(className);
+		return this;
+	}
+
+	append(nodes) {
+		for(let node of this) toNodes(node, nodes, n => node.appendChild(n));
 		return this;
 	}
 
@@ -77,72 +82,6 @@ export class ShadowQuery extends Array {
 			if(typeof(value) !== 'string') value = JSON.stringify(value);
 			for(let node of this) node.setAttribute(name, value);
 		}
-		return this;
-	}
-
-	/**
-	 * Create an array of nodes under all selected nodes.
-	 * @example <caption>Example</caption>
-	 * $(this, 'ul').childArray({
-	 * 	array:    $(this, ':host').attr('greet').split(),
-	 * 	template: () => this.getTemplate('listitem'),
-	 * 	update:   (li, item) => li.text(`Hello ${item}!`),
-	 * });
-	 * @param {Object} opt parameters object
-	 * @param {Array} opt.array Array of items to render. If you don't want to
-	 * use opt.update you could also just pass {length: 5} to render 5 nodes
-	 * @param {Number=} opt.chunks if passed renders chunks elements and then
-	 * calls setTimeout before continuing
-	 * @param {String=} opt.selector if you want to render into a node that
-	 * contains other stuff beside the array elements, you need to pass a
-	 * selector, that selects the elements rendered by this.
-	 * @param {Function} opt.template a function that returns the content
-	 * to be rendered. Usually something like:
-	 * () => this.getTemplate('arrayTemplate')
-	 * @param {Function=} opt.update called for each element of the array with
-	 * two parameters: opt.update(renderedContent, opt.array[i]) Note that update
-	 * may be called asynchronously when using opt.chunks
-	 * @return {ShadowQuery} this for chaining
-	 */
-	childArray(opt) {
-		for(let node of this) attachNodeArray(node, opt);
-		return this;
-	}
-
-	/**
-	 * Create a child node under all selected nodes only if a condition is
-	 * true. Once rendered the method does nothing. It never removes the node.
-	 * @example
-	 * constructor() {
-	 * 	super();
-	 * 	$.template(this, {'default':'<ul></ul>', li:'<li></li>'});
-	 * }
-	 * connectedCallback() {
-	 * 	that.attachShadow({mode: open}).appendChild(this.template);
-	 * 	$(this, 'ul').deferredChild({
-	 * 		array:    $(this, ':host').attr('greet').split(),
-	 * 		selector: 'li',
-	 * 		template: () => this.getTemplate('li'),
-	 * 	});
-	 * }
-	 * @param {Object} opt parameters object
-	 * @param {bool} opt.condition renders if true and node not already there
-	 * @param {String} opt.selector must match the created childNode
-	 * @param {Function} opt.template a function that returns the content
-	 * to be rendered. Usually something like:
-	 * () => this.getTemplate('arrayTemplate')
-	 * @param {Function=} opt.update called for each element of the array with
-	 * two parameters: opt.update(renderedContent, opt.array[i]) Note that update
-	 * may be called asynchronously when using opt.chunks
-	 * @return {ShadowQuery} this for chaining
-	 */
-	deferredChild({condition, selector, template, update}) {
-		if(condition) {for(let node of this) {
-			if(node.querySelectorAll(selector).length) continue;
-			const deferred = template();
-			node.appendChild(deferred);
-			if(update) update(deferred);
-		}}
 		return this;
 	}
 
@@ -284,54 +223,12 @@ export function shadowQuery(node, selector) {
 /** Alias for shadowQuery. See {@link ShadowQuery#constructor} */
 export const $ = shadowQuery;
 
-function attachNodeArray(node, {array, chunks, selector, template, update}) {
-	if(node[timeoutKey(selector)]) {
-		clearTimeout(node[timeoutKey(selector)]);
-		delete node[timeoutKey(selector)];
-	}
-	let nodes = $(selector ? node.querySelectorAll(selector) : node.childNodes);
-	if(nodes.length > array.length) {
-		for(let i = array.length; i < nodes.length; i++) {
-			node.removeChild(nodes[i]);
-		}
-	}
-	iterNodeArrayChunk(
-		node, nodes, 0, {array, chunks, selector, template, update}
-	);
+function toNodes(parent, nodes, callback) {
+	if(nodes instanceof Node) return callback(nodes);
+	if(typeof(nodes) === 'function') return nodes(parent, callback);
+	if(!(nodes instanceof Array)) nodes = new ShadowQuery(nodes);
+	for(let node of nodes) callback(node);
 }
-
-function iterNodeArrayChunk(
-	node, nodes, idx, {array, chunks, selector, template, update}
-) {
-	if(idx >= array.length) return;
-	if(chunks && !(idx % chunks)) {
-		node[timeoutKey(selector)] = setTimeout(function() {
-			iterNodeArray(
-				node, nodes, idx, {array, chunks, selector, template, update}
-			);
-		});
-	}
-	else {iterNodeArray(
-		node, nodes, idx, {array, chunks, selector, template, update}
-	);}
-}
-
-function iterNodeArray(
-	node, nodes, idx, {array, chunks, selector, template, update}
-) {
-	let currentNode = nodes[idx];
-	if(!currentNode) {
-		node.appendChild(template());
-		currentNode = node.lastChild;
-	}
-	if(update) update($(currentNode), array[idx], idx);
-	delete node[timeoutKey(selector)];
-	iterNodeArrayChunk(
-		node, nodes, ++idx, {array, chunks, selector, template, update}
-	);
-}
-
-function timeoutKey(sel) {return `_shadowQueryChildArray${sel || ''}`;}
 
 function find(coll, selector) {
 	const nodes = [];
@@ -352,31 +249,57 @@ function shadow(node) {return node.shadowRoot || node;}
  * `$.template` creates the `this.template` getter and the `this.getTemplate`
  * method. Instead of just passing a string to `$.template` you can also pass
  * an object, if you need more than one template. One of the templates must be
- * `'default'` if you want to use `this.template`.
+ * `'default'` if you want to use `this.template`. The this.getTemplate method
+ * accepts two parameters. The first is the template name - defaulting to
+ * 'default', the second is an optional patch. If the template you get is
+ * a dynamic template, you can pass patch to patch the definition of the
+ * template. This allows you to pass things like array and condition where
+ * you dynamically determine them instead of taking the roundtrip via 'this'
+ * and use methods on the template to yield these dynamic values.
+ *
  * @example
  * constructor() {
  * 	super();
- * 	$.template(this, {'default':'<ul></ul>', li:'<li></li>'});
+ * 	$.template(this, {
+ * 		'default':'<ul></ul>',
+ * 		items: {
+ * 			array: () => $(this, ':host').attr('greet').split(),
+ * 			template: 'li',
+ * 		},
+ * 		li:'<li></li>'
+ * 	});
  * }
  * connectedCallback() {
  * 	that.attachShadow({mode: open}).appendChild(this.template);
- * 	$(this, 'ul').deferredChild({
- * 		array:    $(this, ':host').attr('greet').split(),
- * 		selector: 'li',
- * 		template: () => this.getTemplate('li'),
- * 	});
+ * 	$(this, 'ul').append(this.getTemplate('items'));
  * }
  * @static
  * @function template
  * @param {Node} node - the initial node, usually `this`
- * @param {String|Object} template - the template string, use Object to
- * initialize several templates
+ * @param {String|Object} template - the template string, use Object to define
+ * several templates
+ * @param {String|Object} template.* - the template string, use Object to
+ * define dynamic templates
+ * @param {Array|Function=} template.*.array array or function that returns an
+ * Array of items to render. If you don't want to use template.update you could
+ * also just return {length: 5} to render 5 nodes
+ * @param {Number=} template.*.chunks if passed renders chunks elements and
+ * then calls setTimeout before continuing
+ * @param {Bool|Function=} template.*.condition - a function that is optionally
+ * called to determine wether to render (if truthy)
+ * @param {String} template.*.template - a string that is the key of another
+ * template defined in the same call to $.template
+ * @param {Function=} template.*.update called for each element of the array
+ * with two parameters: template.*.update(renderedContent, opt.array[i]) Note
+ * that update may be called asynchronously when using opt.chunks
  */
 shadowQuery.template = function(node, template) {
 	if(node.getTemplate) return;
 	if(typeof(template) === 'string') template = {'default': template};
-	createTemplate(template);
-	node.constructor.prototype.getTemplate = function(name = 'default') {
+	createTemplate(node, template);
+	node.constructor.prototype.getTemplate = function(name = 'default', patch) {
+		if(patch && template[name].patch) return template[name].patch(patch);
+		if(template[name] instanceof DynTemplate) return template[name].process;
 		return template[name].content.cloneNode(true);
 	};
 	Object.defineProperty(node.constructor.prototype, 'template', {
@@ -384,14 +307,106 @@ shadowQuery.template = function(node, template) {
 	});
 };
 
-function createTemplate(template) {
+function createTemplate(node, template) {
 	for(let name of Object.keys(template)) {
-		const tmpl = document.createElement('template');
-		tmpl.innerHTML = template[name];
-	// document.body.appendChild(tmpl);
-		template[name] = tmpl;
+		if(typeof template[name] === 'string') {
+			const tmpl = document.createElement('template');
+			tmpl.innerHTML = template[name];
+		// document.body.appendChild(tmpl);
+			template[name] = tmpl;
+		}
+		else template[name] = new DynTemplate(node, template[name], name);
 	}
 }
+
+class DynTemplate {
+	constructor(node, template, key) {
+		this._node = node;
+		this._template = this.__template = template;
+		this._key = key;
+		this.process = this._unpatched.bind(this);
+		this.__patched = this._patched.bind(this);
+	}
+
+	patch(patch) {
+		this.__template = Object.assign(patch, this._template);
+		return this.__patched;
+	}
+
+	_unpatched(parent, callback) {
+		this._attachDynNodes(this._template, parent, callback);
+	}
+
+	_patched(parent, callback) {
+		this._attachDynNodes(this.__template, parent, callback);
+	}
+
+	_attachDynNodes(tmpl, parent, callback) {
+		const array = this._getArray(tmpl);
+		if(parent[this._timeoutKey]) {
+			clearTimeout(parent[this._timeoutKey]);
+			delete parent[this._timeoutKey];
+		}
+		if(!parent[this._dynNodeKey]) parent[this._dynNodeKey] =  [];
+		let nodes =  parent[this._dynNodeKey];
+		if(!this._condition(tmpl)) return this._removeNodes(parent, 0, nodes);
+		else if(nodes.length > array.length) {
+			this._removeNodes(parent, array.length, nodes);
+		}
+		this._iterDynNodeChunk(0, tmpl, array, parent, callback);
+	}
+
+	_getArray(template) {
+		if(!template.array) return [undefined];
+		if(typeof(template.array) === 'function') return template.array();
+		return template.array;
+	}
+
+	_condition(tmpl) {
+		return !tmpl.hasOwnProperty('condition') || (
+			(typeof(tmpl.condition) === 'function') ?
+			tmpl.condition() : tmpl.condition
+		);
+	}
+
+	_removeNodes(parent, from, nodes) {
+		for(let i = from; i < nodes.length; i++) {
+			for(let j = 0; j < nodes[i].length; j++) {
+				parent.removeChild(nodes[i][j]);
+			}
+		}
+		nodes.splice(from);
+	}
+
+	_iterDynNodeChunk(idx, tmpl, array, parent, callback) {
+		const {chunks} = tmpl;
+		if(idx >= array.length) return;
+		if(chunks && !(idx % chunks)) {
+			parent[this._timeoutKey] = setTimeout(() => {
+				this._iterNodeArray(idx, tmpl, array, parent, callback);
+			});
+		}
+		else {this._iterNodeArray(idx, tmpl, array, parent, callback);}
+	}
+
+	_iterNodeArray(idx, tmpl, array, parent, callback) {
+		let {template, update} = tmpl;
+		let currentNode = parent[this._dynNodeKey][idx];
+		if(!currentNode) {
+			template = this._node.getTemplate(template);
+			currentNode = $(template.children);
+			callback(template);
+			parent[this._dynNodeKey].push(currentNode);
+		}
+		if(update) update($(currentNode), array[idx], idx);
+		delete parent[this._timeoutKey];
+		this._iterDynNodeChunk(++idx, tmpl, array, parent, callback);
+	}
+
+	get _dynNodeKey() {return `_shadowQueryChildArrayDynNode${this._key}`;}
+	get _timeoutKey() {return `_shadowQueryChildArrayTimeout${this._key}`;}
+}
+
 
 /*
  * This will create `this._shadowQueryChange = {}` and track changes there.

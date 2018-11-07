@@ -25,16 +25,20 @@ __High Performance__: shadow-query dbmonster ist among the fastest dbmonsters ou
 		window.customElements.define('hello-world', class extends HTMLElement {
 			constructor() {
 				super();
-				$.template(this, {'default': template, listItem});
+				$.template(this, {
+					'default': template,
+					listItem,
+					list: {
+						array   : $(this, ':host').attr('greet').split(' '),
+						template: 'listItem',
+						update  : (li, item) => li.text(`Hello ${item}!`),
+					}
+				});
 				$(this).on('click', () => alert('ShadowQuery loves you!'));
 			}
 			connectedCallback() {
 				this.attachShadow({mode: 'open'}).appendChild(this.template);
-				$(this, 'ul').childArray({
-					array   : $(this, ':host').attr('greet').split(' '),
-					template: (        ) => this.getTemplate('listItem'),
-					update  : (li, item) => li.text(`Hello ${item}!`),
-				});
+				$(this, 'ul').append(this.getTemplate('list'));
 			}
 		});
 	</script></head>
@@ -193,25 +197,23 @@ This is somewhat of an acid test for code dealing with web components: every onc
 ```js
 const template = '<ul></ul>';
 const listitem = '<li> </li>'; // Space -> textNode!
-document.registerElement('hello-framework', class extends HTMLElement {
+window.customElements.define('hello-framework', class extends HTMLElement {
 	constructor() {
 		super();
-		$.template(this, {'default': template, listitem});
-		$(this).on('attr:greet', this._update.bind(this));
-	}
-
-	connectedCallback() {
-		if(this.shadowRoot) return;
-		this.attachShadow({mode: open}).appendChild(this.template);
-		this._update();
-	}
-
-	_update() {
-		$(this, 'ul').childArray({
-			array:    $(this, ':host').attr('greet').split(),
-			template: () => this.getTemplate('listitem'),
-			update:   (li, item) => li.text(`Hello ${item}!`),
+		$.template(this, {
+			'default': template,
+			listItem,
+			list: {
+				array   : $(this, ':host').attr('greet').split(' '),
+				template: 'listItem',
+				update  : (li, item) => li.text(`Hello ${item}!`),
+			}
 		});
+		$(this).on('click', () => alert('ShadowQuery loves you!'));
+	}
+	connectedCallback() {
+		this.attachShadow({mode: 'open'}).appendChild(this.template);
+		$(this, 'ul').append(this.getTemplate('list'));
 	}
 });
 ```
