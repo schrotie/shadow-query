@@ -341,10 +341,7 @@ function find(coll, selector) {
 	const nodes = [];
 	for(let i = 0; i < coll.length; i++) {
 		if(/^\s*:host\s*/.test(selector)) nodes.push(coll[i].host || coll[i]);
-		else {
-			const collection = coll[i].querySelectorAll(selector);
-			for(let i = 0; i < collection.length; i++) nodes.push(collection[i]);
-		}
+		else nodes.push(...coll[i].querySelectorAll(selector));
 	}
 	return nodes;
 }

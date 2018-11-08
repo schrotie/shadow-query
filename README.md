@@ -1,7 +1,7 @@
 # shadow-query
 Nano sized utilities library for writing vanilla web components
 
-ShadowQuery is a tiny (1.5k uglified gzip as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
+ShadowQuery is a tiny (1.8k uglified gzip as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
 
 __Tiny__: demo/dbmonster.html is a selfcontained HTML app _below 10K_ (load without server into your Chrome or Firefox, for other browsers you may need to add more polyfills).
 
@@ -108,7 +108,7 @@ The difference is that ShadowQuery takes the template, creates an HTMLTemplateEl
 
 # API
 
-The ShadowQuery module has two exports. Both are the same, just the names differ. One is `shadowQuery`, the other is for good old time's (and brevity's) sake `$`.
+The ShadowQuery module has two exports. The first the `ShadowQuery`. You should only use it, if you want to modify/extend shadowQuery. The other export '`shadowQuery` is also the default export. Thus `import {shadowQuery} ...` and `import shadowQuery ...` both work. I usually do `import $ ...` for brevity's.
 
 There are two types of APIs in ShadowQuery. There are static methods like `$.template`. All of these do something to your component-class. `$` is also a function that facilitates working with the DOM.
 
