@@ -49,6 +49,32 @@ export class ShadowQuery extends Array {
 		return this;
 	}
 
+	/**
+	 * Insert DOM after all selected nodes
+	 * @param {Node|Node[]|ShadowQuery|getTemplate} nodes - DOM to insert;
+	 * getTemplate is the result of a call to this.getTemplate
+	 * (see {@link module:shadowQuery.template $.template})
+	 * @return {ShadowQuery} this for chaining calls
+	 */
+	after(nodes) {
+		for(let node of this) {
+			if(node === node.parentNode.lastChild) {
+				toNodes(node, nodes, n => node.appendChild(n));
+			}
+			else toNodes(
+				node, nodes, n => node.parentNode.insertBefore(n, node.nextSibling)
+			);
+		}
+		return this;
+	}
+
+	/**
+	 * Append DOM to all selected nodes
+	 * @param {Node|Node[]|ShadowQuery|getTemplate} nodes - DOM to insert;
+	 * getTemplate is the result of a call to this.getTemplate
+	 * (see {@link module:shadowQuery.template $.template})
+	 * @return {ShadowQuery} this for chaining calls
+	 */
 	append(nodes) {
 		for(let node of this) toNodes(node, nodes, n => node.appendChild(n));
 		return this;
@@ -85,6 +111,20 @@ export class ShadowQuery extends Array {
 		return this;
 	}
 
+	/**
+	 * Insert DOM before all selected nodes
+	 * @param {Node|Node[]|ShadowQuery|getTemplate} nodes - DOM to insert;
+	 * getTemplate is the result of a call to this.getTemplate
+	 * (see {@link module:shadowQuery.template $.template})
+	 * @return {ShadowQuery} this for chaining calls
+	 */
+	before(nodes) {
+		for(let node of this) {
+			toNodes(node, nodes, n => node.parentNode.insertBefore(n, node));
+		}
+		return this;
+	}
+
 	/** check if a selected element has the designated CSS-class ;
 	 * uses classList.contains
 	 * @param {string} className - the class to check
@@ -95,11 +135,38 @@ export class ShadowQuery extends Array {
 	}
 
 	/**
+	 * unregister an event handler on all selected nodes; support attribute
+	 * value change events
+	 * @param {String} evt event name to pass to addEventListener. To listen
+	 * to attribute changes do 'attr:name'. This will create a MutationObserver
+	 * for changes of the attribute called 'name'.
+	 * @param {Function} callback function to call on event
+	 * @return {ShadowQuery} this for chaining
+	 */
+	off(evt, callback) {
+		for(let node of this) {
+			if(/^attr:/.test(evt)) {
+			// TODO
+			// (new MutationObserver(callback)).observe(node,
+			// {attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]});
+			}
+			else node.removeEventListener(evt, callback);
+		}
+		return this;
+	}
+
+	/**
 	 * register an event handler on all selected nodes; support attribute
 	 * value change events
 	 * @example
-	 * $(this, 'button').on('click', this._onButtonClick.bind(this));
-	 * $(this, ':host').on('attr:hello', this._onHelloAtributeChange.bind(this));
+	 * $(this, 'button').on(
+	 * 	'click',
+	 * 	this._onButtonClick.bind(this)
+	 * );
+	 * $(this, ':host').on(
+	 * 	'attr:hello',
+	 * 	this._onHelloAtributeChange.bind(this)
+	 * );
 	 * @param {String} evt event name to pass to addEventListener. To listen
 	 * to attribute changes do 'attr:name'. This will create a MutationObserver
 	 * for changes of the attribute called 'name'.
@@ -108,12 +175,50 @@ export class ShadowQuery extends Array {
 	 */
 	on(evt, callback) {
 		for(let node of this) {
-			node.addEventListener(evt, callback);
 			if(/^attr:/.test(evt)) {
 				(new MutationObserver(callback)).observe(node,
 				{attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]});
 			}
 			else node.addEventListener(evt, callback);
+		}
+		return this;
+	}
+
+	/**
+	 * register an event handler on all selected nodes; support attribute
+	 * value change events; callback will be called at most once; Note:
+	 * this is called "one" in jQuery. For once I deviate from jQuery since
+	 * the name is IMHO a bad choice. Instead I use the better name established
+	 * in node.js
+	 * @param {String} evt event name to pass to addEventListener. To listen
+	 * to attribute changes do 'attr:name'. This will create a MutationObserver
+	 * for changes of the attribute called 'name'.
+	 * @param {Function} callback function to call on event
+	 * @return {ShadowQuery} this for chaining
+	 */
+	once(evt, callback) {
+		for(let node of this) {
+			if(/^attr:/.test(evt)) onceObserver(node, evt, callback);
+			else                   onceListener(node, evt, callback);
+		}
+		return this;
+	}
+
+	/**
+	 * Insert DOM as first content of all selected nodes
+	 * @param {Node|Node[]|ShadowQuery|getTemplate} nodes - DOM to insert;
+	 * getTemplate is the result of a call to this.getTemplate
+	 * (see {@link module:shadowQuery.template $.template})
+	 * @return {ShadowQuery} this for chaining calls
+	 */
+	prepend(nodes) {
+		for(let node of this) {
+			if(node === node.parentNode.lastChild) {
+				toNodes(node, nodes, n => node.appendChild(n));
+			}
+			else toNodes(
+				node, nodes, n => node.parentNode.insertBefore(n, node.firstChild)
+			);
 		}
 		return this;
 	}
@@ -196,8 +301,9 @@ export class ShadowQuery extends Array {
 
 	/** toggle a CSS-class on all selected nodes; uses classList.toggle
 	 * @param {string} className - the class to toggle
-	 * @param {bool=} state - if true {@link ShadowQuery#addClass addClass},
-	 * if false {@link ShadowQuery#removeClass removeClass}
+	 * @param {bool=} state - if true
+	 * {@link module:shadowQuery.ShadowQuery#addClass addClass},
+	 * if false {@link module:shadowQuery.ShadowQuery#removeClass removeClass}
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	toggleClass(className, state) {
@@ -211,7 +317,7 @@ export class ShadowQuery extends Array {
 	}
 }
 
-/** Instantiate a ShadowQuery object. See {@link ShadowQuery#constructor}
+/** Instantiate a ShadowQuery object. See {@link module:shadowQuery.ShadowQuery}
  * @param {Node|Node[]|NodeList|ShadowQuery} node - the initial node
  * @param {String=} selector - if passed will query node(s) with selector
  * @return {ShadowQuery} instance
@@ -220,8 +326,9 @@ export function shadowQuery(node, selector) {
 	return new ShadowQuery(node, selector);
 }
 
-/** Alias for shadowQuery. See {@link ShadowQuery#constructor} */
-export const $ = shadowQuery;
+export default shadowQuery;
+
+const $ = shadowQuery;
 
 function toNodes(parent, nodes, callback) {
 	if(nodes instanceof Node) return callback(nodes);
@@ -242,6 +349,26 @@ function find(coll, selector) {
 	return nodes;
 }
 
+function onceListener(node, evt, callback) {
+	node.addEventListener(evt, _onceListener);
+	function _onceListener(...rest) {
+		node.removeEventListener(evt, _onceListener);
+		callback(...rest);
+	}
+}
+
+function onceObserver(node, evt, callback) {
+	const observer = new MutationObserver(_onceObserver);
+	observer.observe(
+		node,
+		{attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]}
+	);
+	function _onceObserver(...rest) {
+		observer.disconnect();
+		callback(...rest);
+	}
+}
+
 function shadow(node) {return node.shadowRoot || node;}
 
 
@@ -249,13 +376,25 @@ function shadow(node) {return node.shadowRoot || node;}
  * `$.template` creates the `this.template` getter and the `this.getTemplate`
  * method. Instead of just passing a string to `$.template` you can also pass
  * an object, if you need more than one template. One of the templates must be
- * `'default'` if you want to use `this.template`. The this.getTemplate method
- * accepts two parameters. The first is the template name - defaulting to
- * 'default', the second is an optional patch. If the template you get is
- * a dynamic template, you can pass patch to patch the definition of the
- * template. This allows you to pass things like array and condition where
- * you dynamically determine them instead of taking the roundtrip via 'this'
- * and use methods on the template to yield these dynamic values.
+ * `'default'` if you want to use `this.template`.
+ *
+ * If you pass an object, the keys are your template keys for
+ * `this.getTemplate`. The values are the templates. For the values you can
+ * again use String or Object. Use Object to define a dynamic template.
+ * Dynamic templates can render arrays and render conditionally. Using
+ * dynamic templates together with the ShadowQuery DOM helper insertion
+ * functions like `append` allows you to easily manage nodes based on dynamic
+ * conditions. Note that when a condition changes to false or an array shrinks,
+ * ShadowQuery DOM helper _insertion_ methods will actually _remove_ content
+ * instead of _insert_ it. See parameter description for details.
+ *
+ * The this.getTemplate method accepts two parameters. The first is the
+ * template name - defaulting to 'default', the second is an optional patch.
+ * If the template you get is a dynamic template, you can pass patch to patch
+ * the definition of the template. This allows you to pass things like array
+ * and condition where you dynamically determine them instead of taking the
+ * roundtrip via 'this' and use methods on the template to yield these dynamic
+ * values. This may yield better readable code, though your mileage may vary.
  *
  * @example
  * constructor() {
@@ -281,17 +420,17 @@ function shadow(node) {return node.shadowRoot || node;}
  * @param {String|Object} template.* - the template string, use Object to
  * define dynamic templates
  * @param {Array|Function=} template.*.array array or function that returns an
- * Array of items to render. If you don't want to use template.update you could
- * also just return {length: 5} to render 5 nodes
- * @param {Number=} template.*.chunks if passed renders chunks elements and
- * then calls setTimeout before continuing
+ * Array of items to render. If you don't want to use `template.update` you could
+ * also just return `{length: 5}` to render 5 nodes
+ * @param {Number=} template.*.chunks if passed renders `chunks` elements and
+ * then calls `setTimeout` before continuing
  * @param {Bool|Function=} template.*.condition - a function that is optionally
  * called to determine wether to render (if truthy)
  * @param {String} template.*.template - a string that is the key of another
- * template defined in the same call to $.template
+ * template defined in the same call to `$.template`
  * @param {Function=} template.*.update called for each element of the array
- * with two parameters: template.*.update(renderedContent, opt.array[i]) Note
- * that update may be called asynchronously when using opt.chunks
+ * with two parameters: `template.*.update(renderedContent, template.*.array[i])`
+ * Note that update may be called asynchronously when using `template.*.chunks`
  */
 shadowQuery.template = function(node, template) {
 	if(node.getTemplate) return;
@@ -436,7 +575,10 @@ shadowQuery.changed = function(node, change) {
  * Quite often an event handler changes something and directly or indirectly
  * triggers the event, that it handles. noSelf helps break this recursion.
  * @example
- * this.addEventListener('click', $.noSelf(this._handleEvent.bind(this)));
+ * this.addEventListener(
+ * 	'click',
+ * 	$.noSelf(this._handleEvent.bind(this))
+ * );
  * @static
  * @function noSelf
  * @param {Function} callback function to call non-recursively
@@ -466,8 +608,10 @@ shadowQuery.noSelf = function(callback) {
  * 	$.properties({hello: 'Hello world!');
  * 	console.log(this.hello); // -> 'Hello world!'
  * }
- * // Do `$.properties({hello: undefined)};` to bypass default value
- * // initialization, but still keep up with properties set before registration.
+ * // Do `$.properties({hello: undefined)};` to
+ * // bypass default value initialization, but
+ * // still keep up with properties set before
+ * // registration.
  * @static
  * @function properties
  * @param {Node} node component to initialize, usually `this`

@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html>
 	<head><script type="module">
-		import {$} from '../shadowQuery.js';
+		import $ from '../shadowQuery.js';
 
 		const template = `
-		<style>:host {cursor: pointer; font-family: sans-serif;}</style>
-		<h3><slot></slot></h3>
-		<ul></ul>
+			<style>:host {
+				cursor: pointer;
+				font-family: sans-serif;
+			}</style>
+			<h3><slot></slot></h3>
+			<ul></ul>
 		`;
 		const listItem = `<li> </li>`;
 
-		window.customElements.define('hello-world', class extends HTMLElement {
+		window.customElements.define('hello-framework', class extends HTMLElement {
 			constructor() {
 				super();
 				$.template(this, {
@@ -30,5 +33,7 @@
 			}
 		});
 	</script></head>
-	<body><hello-world greet="Angular React Vue">Greetings!</hello-world></body>
+	<body>
+		<hello-framework greet="Angular React Vue">Greetings!</hello-framework>
+	</body>
 </html>

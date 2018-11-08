@@ -26,7 +26,7 @@
 		"jsdoc": "latest"
 	},
 	"scripts": {
-		"build-doc": "./node_modules/.bin/jsdoc shadowQuery.js -d documentation",
+		"build-doc": "./node_modules/.bin/jsdoc --configure jsdoc.json -d documentation shadowQuery.js README.md",
 		"lint": "eslint . --ext js,html --ignore-path .gitignore",
 		"test": "npm run lint"
 	}

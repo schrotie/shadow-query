@@ -13,7 +13,7 @@ __High Performance__: shadow-query dbmonster ist among the fastest dbmonsters ou
 <!DOCTYPE html>
 <html>
 	<head><script type="module">
-		import {$} from '/node_modules/shadow-query/shadowQuery.js';
+		import $ from '/node_modules/shadow-query/shadowQuery.js';
 
 		const template = `
 		<style>:host {cursor: pointer; font-family: sans-serif;}</style>
@@ -92,7 +92,7 @@ document.registerElement('hello-world', class extends HTMLElement {
 ```
 ## ShadowQuery
 ```js
-import {$} from '/node-modules/shadow-query/shadowQuery.js';
+import $ from '/node-modules/shadow-query/shadowQuery.js';
 document.registerElement('hello-world', class extends HTMLElement {
 	constructor() {
 		super();
