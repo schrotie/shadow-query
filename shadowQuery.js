@@ -371,7 +371,7 @@ function shadow(node) {return node.shadowRoot || node;}
 const templates = {};
 
 /**
- * `$.template` an HTMLTemplateElement, initializez it with the passed
+ * `$.template` creates an HTMLTemplateElement, initializes it with the passed
  * template string, stores it in its template library, and returns a clone
  * of the content. On subsequent calls, the existing template is efficiently
  * cloned.
@@ -410,7 +410,7 @@ const templates = {};
  * with two parameters:
  * `template.update(renderedContent, template.array[i])`
  * Note that update may be called asynchronously when using `template.chunks`
- * @param {String=} id - key to identify rendered content; only required if
+ * @param {String=} template.id - key to identify rendered content; only required if
  * you want multiple dynTemplates under the same parent
  * @return {DocumentFragment|dynTemplate} cloned from the created
  * template, or the processor of a DynTemplate if passed an object for a

@@ -1,7 +1,7 @@
 # shadow-query
 Nano sized utilities library for writing vanilla web components
 
-ShadowQuery is a tiny (1.8k uglified gzip as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
+ShadowQuery is a tiny (1.6k uglified gzip, some 270 lines of code without comments and new lines as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
 
 __Tiny__: demo/dbmonster.html is a selfcontained HTML app _below 10K_ (load without server into your Chrome or Firefox, for other browsers you may need to add more polyfills).
 
@@ -30,7 +30,7 @@ __High Performance__: shadow-query dbmonster ist among the fastest dbmonsters ou
 				$(this).on('click', () => alert('ShadowQuery loves you!'));
 			}
 			connectedCallback() {
-				this.attachShadow({mode: 'open'}).appendChild($.template(template));
+				$.shadow(this, template);
 				$(this, 'ul').append($.template({
 					array   : $(this, ':host').attr('greet').split(' '),
 					template: '<li> </li>',
@@ -56,21 +56,28 @@ ShadowQuery is currently a proof of concept. I have developed one smallish (1.5k
 
 # Intended Audience
 
-If you're the ~~Visual Basic~~ Angular/React kind of dev, ShadowQuery is not for you. It does not take your hand, it does not structure your project. ShadowQuery is for you (or would be if it had outgrown experimental status), if you like to be in control, if you know what you do. It has zero magic, no surprises … actually, one thing did surprise me: you really need very little utility to empower you to write vanilly web components and make full use of the platform.
+If you're the ~~Visual Basic~~ Angular/React kind of dev, ShadowQuery is not for you. It does not hold your hand, it does not structure your project. ShadowQuery is for you (or would be if it had outgrown experimental status), if you like to be in control, if you know what you're doing. It has zero magic, no surprises … actually, one thing did surprise me: you really need very little utility to empower you to write vanilly web components and make full use of the platform.
 
 # Motivation
 
-So I was writing this web app of mine, starting from vanilla web components. As I expected I soon reached a point where the platform technology needs significant enhancement in order to get good results. `this.shadowRoot.innerHTML = template` doesn't kick it for several reasons, performance being just one - e.g. you get unusable UX in many situations if this is all you ever do.
+So I was writing this web app of mine, starting from vanilla web components. At some point I pulled in a templating library and in the end was unhappy with the result (custom template syntax and performance). So I started implementing my own helpers which ultimately led to ShadowQuery.
 
-So I decided to give lit-html a shot. It comes from the Polymer developers whom I respect a lot for what they have done on Polymer. When my app was done I was somewhat unimpressed. Performance was mediocre considering my little app, footprint was pretty cool. The performance nagged at me, though, a bigger app could easily get into troubled waters (it's on par with Polymer, but I was expecting more).
+These past five years I have grown increasingly suspicious of the dynamic templating done in Angular/React/Vue and almost any modern framework. Dynamic templating has become a universal pattern of modern web development. I'm not entirely sure that this is the right way to. Templates and components I have no doubt about, at all, "just" these templates with injected JavaScript. I have laid out my thoughts in more detail [here](https://medium.com/@schrotie/web-platform-to-the-rescue-c81719dd6f58).
 
-And the syntax was also okayish. I didn't like, that it injects its idiom into my templates with attribute- and event bindings and more. Then I had the idea to try my own thing, add some jQuery like syntactic sugar and went to bed with the vision of the army of aged jQuery devs embracing my ShadowQuery and making me rich and famous.
+But dynamic templates are so damn convenient. I had to find out what's necessary to work without them. Turns out: a puny 270 lines of generic helper code, that's mostly straightforward shorthand for things already on the platform plus a bit of array and conditional templating. And this tiny bit of code did not just keep me barely afloat: Components written with it are concise, expressive and very readable and maintainable and - if done right - leave any framework-developed app yelping in the dust with regards to footprint an performance. Most importantly: any web developer with some worthwhile experience of working with actual DOM and Javascript can tell immediately what's going on.
 
-Next day I implemented the proof of concept and migrated my app. When I was done I was quite happy to find that performance _and_ footprint were dramatically improved over lit-html. The code size of components written with ShadowQuery even became slightly smaller, insignificantly so, though.
+So that is ShadowQuery: A showcase and plea for another approach to web development. It's so tiny that there's little hurdle to using it. Costs next to nothing footprint-wise and if it breaks on you, you can easily fix it, 'cause it's just 270 lines. If you think the approach sounds interesting but don't like ShadowQuerie's syntax: great! Write your own, it's surprisingly simple.
 
-More importantly, I really like how ShadowQuery makes it obvious what's going on. With template utilities like lit-html you write complex templates intermingled with Javascript. On updates you re-render that template, but it's somewhat hard to grasp what's going on then.  Mixing imperative code into a declarative template may not be the ideal programming paradigm … at least to me.
-
-Oh, did I mention that ShadowQuery supports you through the whole nine yards, not just with updating your template (which it, strictly speaking, doesn't do, at all)?
+Maybe it will eventually grow to to 2K but I currently consider it complete (feature-wise, still needs fixing, syntax may change ...). The trick is: it covers the most common use case and simplifies DOM access for anything else. I won't for example implement inline style manipulation, because I consider it bad practice. But doing
+```js
+$(this, 'a').forEach(a => a.style.textDecoration = 'none');
+// or:
+$(this, '#myLink')[0].style.textDecoration = 'none';
+```
+is still simple, and if you want, it's easy to `import {ShadowQuery} from '...'` and manipulate the prototype to support
+```js
+$(this, 'a').css({textDecoration:'none'});
+```
 
 # Installation
 ```sh
@@ -152,7 +159,7 @@ The example calls two methods in a chain: first `text` for each selected node ca
 <span></span>  <!-- breaks, can't call text on span -->
 ```
 
-You may also use zero-width-space: `&#8203;`. This is an important point: if you want to put text into your template/shadowDOM, you have to create a textNode for it. ShadowQuery doesn't do that for you. It's just a space, but it is significant. By the way: lit-html creates two comment nodes and a text node in such instances, so ShadowQuery is more efficient there, but it only works if you take care of it. ShadowQuery is just a collection of shorthand methods and no nanny. jQuery is a lot more powerful there, too, doing all kinds of magic. I want ShadowQuery to be my bare metal web component utility workbench, not more - and no surprises, no strings attached (pun intended).
+You may also use zero-width-space: `&#8203;`. This is an important point: if you want to put text into your template/shadowDOM, you have to create a textNode for it. ShadowQuery doesn't do that for you. It's just a space, but it is significant. ShadowQuery is just a collection of shorthand methods and no nanny. jQuery is a lot more powerful there, doing all kinds of magic. I want ShadowQuery to be my bare metal web component utility workbench, not more - and no surprises, no strings attached (pun intended).
 
 So the example first calls `text`, which like all the DOM utilities returns a chainable reference to itself in most cases. If you call `text` without arguments, it will return the text of the first matched element (like jQuery). Here we manipulate, though, and get a chainable result on which (i.e. on the same `span` element in this case) on which `toggleClass` is called. `toggleClass` is like jQuerie's `toggleClass`, but it is just a shorthand for `node.classList.toggle`. If your browser does not support `classList` (_you know who ..._) you're screwed. Well, actually you're not screwed but required to load the respective polyfill. But you know, no nanny and blah ...
 
@@ -207,7 +214,7 @@ Result:
 
 # More
 
-`childArray` can do it bit more, chunked rendering for example. For this and a more helpers/features please refer to the API reference. To view it:
+Dynamic templates can do it bit more, chunked and/or conditional rendering for example. There's also more insertion and event helpers. For this and a more helpers/features please refer to the API reference. To view it:
 ```sh
 git clone https://github.com/schrotie/shadow-query
 cd shadow-query

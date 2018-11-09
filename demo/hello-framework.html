@@ -18,7 +18,7 @@
 				$(this).on('click', () => alert('ShadowQuery loves you!'));
 			}
 			connectedCallback() {
-				this.attachShadow({mode: 'open'}).appendChild($.template(template));
+				$.shadow(this, template);
 				$(this, 'ul').append($.template({
 					array   : $(this, ':host').attr('greet').split(' '),
 					template: '<li> </li>',
