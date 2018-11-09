@@ -13,36 +13,35 @@ __High Performance__: shadow-query dbmonster ist among the fastest dbmonsters ou
 <!DOCTYPE html>
 <html>
 	<head><script type="module">
-		import $ from '/node_modules/shadow-query/shadowQuery.js';
+		import $ from '../shadowQuery.js';
 
 		const template = `
-		<style>:host {cursor: pointer; font-family: sans-serif;}</style>
-		<h3><slot></slot></h3>
-		<ul></ul>
+			<style>:host {
+				cursor: pointer;
+				font-family: sans-serif;
+			}</style>
+			<h3><slot></slot></h3>
+			<ul></ul>
 		`;
-		const listItem = `<li> </li>`;
 
-		window.customElements.define('hello-world', class extends HTMLElement {
+		window.customElements.define('hello-framework', class extends HTMLElement {
 			constructor() {
 				super();
-				$.template(this, {
-					'default': template,
-					listItem,
-					list: {
-						array   : $(this, ':host').attr('greet').split(' '),
-						template: 'listItem',
-						update  : (li, item) => li.text(`Hello ${item}!`),
-					}
-				});
 				$(this).on('click', () => alert('ShadowQuery loves you!'));
 			}
 			connectedCallback() {
-				this.attachShadow({mode: 'open'}).appendChild(this.template);
-				$(this, 'ul').append(this.getTemplate('list'));
+				this.attachShadow({mode: 'open'}).appendChild($.template(template));
+				$(this, 'ul').append($.template({
+					array   : $(this, ':host').attr('greet').split(' '),
+					template: '<li> </li>',
+					update  : (li, item) => li.text(`Hello ${item}!`),
+				}));
 			}
 		});
 	</script></head>
-	<body><hello-world greet="Angular React Vue">Greetings!</hello-world></body>
+	<body>
+		<hello-framework greet="Angular React Vue">Greetings!</hello-framework>
+	</body>
 </html>
 ```
 This works as is in Chrome, for other browsers you may need to load polyfills until they fully support the standart. Everything that starts with `$` above is ShadowQuery, the rest ist standart tech. The result of the above is:
@@ -92,23 +91,22 @@ document.registerElement('hello-world', class extends HTMLElement {
 ```
 ## ShadowQuery
 ```js
-import $ from '/node-modules/shadow-query/shadowQuery.js';
-document.registerElement('hello-world', class extends HTMLElement {
+import $ from '../shadowQuery.js';
+window.customElements.define('hello-world', class extends HTMLElement {
 	constructor() {
 		super();
-		$.template(this, 'Hello world!');
 	}
 	connectedCallback() {
-		that.attachShadow({mode: open}).appendChild(this.template);
+		$.shadow(this, 'Hello world!');
 	}
 });
 ```
 
-The difference is that ShadowQuery takes the template, creates an HTMLTemplateElement only once regardless of how many instances of hello-world are created and provides a native clone of that template when you call the getter `this.template`. This is a lot more efficient than setting `innerHTML`.
+The difference is that ShadowQuery takes the template, creates an HTMLTemplateElement only once regardless of how many instances of hello-world are created and provides a native clone of that template. This is a lot more efficient than setting `innerHTML`.
 
 # API
 
-The ShadowQuery module has two exports. The first the `ShadowQuery`. You should only use it, if you want to modify/extend shadowQuery. The other export '`shadowQuery` is also the default export. Thus `import {shadowQuery} ...` and `import shadowQuery ...` both work. I usually do `import $ ...` for brevity's.
+The ShadowQuery module has two exports. The first the `ShadowQuery`. You should only use it, if you want to modify/extend shadowQuery. The other export '`shadowQuery` is also the default export. Thus `import {shadowQuery} ...` and `import shadowQuery ...` both work. I usually do `import $ ...` for brevity's sake.
 
 There are two types of APIs in ShadowQuery. There are static methods like `$.template`. All of these do something to your component-class. `$` is also a function that facilitates working with the DOM.
 
@@ -116,16 +114,7 @@ jQuery works on the document, ShadowQuery is for web components which work on do
 
 ## Templates
 
-You already saw this in the hello world example. `$.template` creates the `this.template` getter and the `this.getTemplate` method. Instead of just passing a string to `$.template` you can also pass an object, if you need more than one template. One of the templates must be `'default'` if you want to use `this.template`:
-
-```js
-constructor() {
-	super();
-	$.template(this, {'default':template, deferredTemplate});
-}
-```
-
-Now you can do `this.getTemplate('deferredTemplate')` if you want to attach something to your DOM at a later point ... we'll come to that.
+You already saw this in the hello world example. `$.template` creates an HTMLTemplateElement once and then returns clones of its content. If you pass an object instead of a string, you can do stuff like conditional rendering and rendering arrays. We'll cover that in the last example.
 
 ## Text Values and Chaining
 
@@ -140,18 +129,19 @@ const template = `
 <span>Hello world?</span>`;
 
 document.registerElement('hello-world', class extends HTMLElement {
-	constructor() {
-		super();
-		$.template(this, template);
-	}
+	constructor() {super();}
 	connectedCallback() {
 		// should always do this, nodes can be connected several times!
 		if(this.shadowRoot) return;
-		that.attachShadow({mode: open}).appendChild(this.template);
+		$.shadow(this, template);
 		$(this, 'span').text('Hello world!').toggleClass('checked');
 	}
 });
 ```
+
+`$.shadow(this, template)` is just a shorthand for
+`this.attachShadow({mode: open}).appendChild(template)`. Not much, but since
+it's used in most components ...
 
 The `$` method always expects a node as first argument and an optional selector as its second. It calls `(node.shadowRoot || node).querySelectorAll(selector)` and returns its DOM swiss army knife that let's you do various stuff on the result similar to jQuery. In fact, if you are familiar with jQuery you should feel pretty much at home. Be aware, though, that ShadowQuery is a tiny subset of jQuery. The former was a compatibility layer as much as a utility and it filled many holes in the platform that the platform has meanwhile caught up upon.
 
@@ -195,25 +185,15 @@ There's a gotcha here: When you pass a node to `$` ShadowQuery selects its `shad
 
 This is somewhat of an acid test for code dealing with web components: every once in a while you need to render data that comes in an array and now you need to somehow iterate it and create DOM from it. If you used `innerHTML = template`, this is where you break, because a scrolled view will jump to the top if you do this. Here's ShadowQuery's take on the matter. This is also a slightly more involved example that brings together several features of ShadowQuery:
 ```js
-const template = '<ul></ul>';
-const listitem = '<li> </li>'; // Space -> textNode!
 window.customElements.define('hello-framework', class extends HTMLElement {
-	constructor() {
-		super();
-		$.template(this, {
-			'default': template,
-			listItem,
-			list: {
-				array   : $(this, ':host').attr('greet').split(' '),
-				template: 'listItem',
-				update  : (li, item) => li.text(`Hello ${item}!`),
-			}
-		});
-		$(this).on('click', () => alert('ShadowQuery loves you!'));
-	}
+	constructor() {super();}
 	connectedCallback() {
-		this.attachShadow({mode: 'open'}).appendChild(this.template);
-		$(this, 'ul').append(this.getTemplate('list'));
+		$.shadow(this, '<ul></ul>');
+		$(this, 'ul').append($.template({
+			array   : $(this, ':host').attr('greet').split(' '),
+			template: '<li> </li>',
+			update  : (li, item) => li.text(`Hello ${item}!`),
+		}));
 	}
 });
 ```

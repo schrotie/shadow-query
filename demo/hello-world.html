@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+	<head><script type="module">
+		import $ from '../shadowQuery.js';
+		window.customElements.define('hello-world', class extends HTMLElement {
+			constructor() {super();}
+			connectedCallback() {$.shadow(this, 'Hello world!');}
+		});
+	</script></head>
+	<body><hello-world></hello-world></body>
+</html>

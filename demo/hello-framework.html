@@ -11,25 +11,19 @@
 			<h3><slot></slot></h3>
 			<ul></ul>
 		`;
-		const listItem = `<li> </li>`;
 
 		window.customElements.define('hello-framework', class extends HTMLElement {
 			constructor() {
 				super();
-				$.template(this, {
-					'default': template,
-					listItem,
-					list: {
-						array   : $(this, ':host').attr('greet').split(' '),
-						template: 'listItem',
-						update  : (li, item) => li.text(`Hello ${item}!`),
-					}
-				});
 				$(this).on('click', () => alert('ShadowQuery loves you!'));
 			}
 			connectedCallback() {
-				this.attachShadow({mode: 'open'}).appendChild(this.template);
-				$(this, 'ul').append(this.getTemplate('list'));
+				this.attachShadow({mode: 'open'}).appendChild($.template(template));
+				$(this, 'ul').append($.template({
+					array   : $(this, ':host').attr('greet').split(' '),
+					template: '<li> </li>',
+					update  : (li, item) => li.text(`Hello ${item}!`),
+				}));
 			}
 		});
 	</script></head>

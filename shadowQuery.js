@@ -51,9 +51,9 @@ export class ShadowQuery extends Array {
 
 	/**
 	 * Insert DOM after all selected nodes
-	 * @param {Node|Node[]|ShadowQuery|getTemplate} nodes - DOM to insert;
-	 * getTemplate is the result of a call to this.getTemplate
-	 * (see {@link module:shadowQuery.template $.template})
+	 * @param {Node|Node[]|ShadowQuery|$.template} nodes - DOM to insert;
+	 * $.template is the result of a call to
+	 * {@link module:shadowQuery.template $.template}
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	after(nodes) {
@@ -70,9 +70,9 @@ export class ShadowQuery extends Array {
 
 	/**
 	 * Append DOM to all selected nodes
-	 * @param {Node|Node[]|ShadowQuery|getTemplate} nodes - DOM to insert;
-	 * getTemplate is the result of a call to this.getTemplate
-	 * (see {@link module:shadowQuery.template $.template})
+	 * @param {Node|Node[]|ShadowQuery|$.template} nodes - DOM to insert;
+	 * $.template is the result of a call to
+	 * {@link module:shadowQuery.template $.template}
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	append(nodes) {
@@ -113,9 +113,9 @@ export class ShadowQuery extends Array {
 
 	/**
 	 * Insert DOM before all selected nodes
-	 * @param {Node|Node[]|ShadowQuery|getTemplate} nodes - DOM to insert;
-	 * getTemplate is the result of a call to this.getTemplate
-	 * (see {@link module:shadowQuery.template $.template})
+	 * @param {Node|Node[]|ShadowQuery|$.template} nodes - DOM to insert;
+	 * $.template is the result of a call to
+	 * {@link module:shadowQuery.template $.template}
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	before(nodes) {
@@ -368,16 +368,16 @@ function onceObserver(node, evt, callback) {
 
 function shadow(node) {return node.shadowRoot || node;}
 
+const templates = {};
 
 /**
- * `$.template` creates the `this.template` getter and the `this.getTemplate`
- * method. Instead of just passing a string to `$.template` you can also pass
- * an object, if you need more than one template. One of the templates must be
- * `'default'` if you want to use `this.template`.
+ * `$.template` an HTMLTemplateElement, initializez it with the passed
+ * template string, stores it in its template library, and returns a clone
+ * of the content. On subsequent calls, the existing template is efficiently
+ * cloned.
  *
- * If you pass an object, the keys are your template keys for
- * `this.getTemplate`. The values are the templates. For the values you can
- * again use String or Object. Use Object to define a dynamic template.
+ * Instead of template string you can also pass an object in order to generate
+ * a dynamic template.
  * Dynamic templates can render arrays and render conditionally. Using
  * dynamic templates together with the ShadowQuery DOM helper insertion
  * functions like `append` allows you to easily manage nodes based on dynamic
@@ -385,164 +385,119 @@ function shadow(node) {return node.shadowRoot || node;}
  * ShadowQuery DOM helper _insertion_ methods will actually _remove_ content
  * instead of _insert_ it. See parameter description for details.
  *
- * The this.getTemplate method accepts two parameters. The first is the
- * template name - defaulting to 'default', the second is an optional patch.
- * If the template you get is a dynamic template, you can pass patch to patch
- * the definition of the template. This allows you to pass things like array
- * and condition where you dynamically determine them instead of taking the
- * roundtrip via 'this' and use methods on the template to yield these dynamic
- * values. This may yield better readable code, though your mileage may vary.
- *
  * @example
- * constructor() {
- * 	super();
- * 	$.template(this, {
- * 		'default':'<ul></ul>',
- * 		items: {
- * 			array: () => $(this, ':host').attr('greet').split(),
- * 			template: 'li',
- * 		},
- * 		li:'<li></li>'
- * 	});
- * }
  * connectedCallback() {
- * 	that.attachShadow({mode: open}).appendChild(this.template);
- * 	$(this, 'ul').append(this.getTemplate('items'));
+ * 	$.shadow($.template('<ul></ul>');
+ * 	$(this, 'ul').append({
+ * 		array: () => $(this, ':host').attr('greet').split(),
+ * 		template: '<li></li>',
+ * 	});
  * }
  * @static
  * @function template
- * @param {Node} node - the initial node, usually `this`
  * @param {String|Object} template - the template string, use Object to define
- * several templates
- * @param {String|Object} template.* - the template string, use Object to
- * define dynamic templates
- * @param {Array|Function=} template.*.array array or function that returns an
- * Array of items to render. If you don't want to use `template.update` you could
- * also just return `{length: 5}` to render 5 nodes
- * @param {Number=} template.*.chunks if passed renders `chunks` elements and
+ * dynamic template
+ * @param {Array=} template.array array or function that returns an
+ * Array of items to render. If you don't want to use `template.update` you
+ * could also just return `{length: 5}` to render 5 nodes; if you just want
+ * conditional, you can also skip this; if you want to use the `update` callback
+ * with a conditional, you may pass `[item]` so that update gets that item
+ * @param {Number=} template.chunks if passed renders `chunks` elements and
  * then calls `setTimeout` before continuing
- * @param {Bool|Function=} template.*.condition - a function that is optionally
- * called to determine wether to render (if truthy)
- * @param {String} template.*.template - a string that is the key of another
- * template defined in the same call to `$.template`
- * @param {Function=} template.*.update called for each element of the array
- * with two parameters: `template.*.update(renderedContent, template.*.array[i])`
- * Note that update may be called asynchronously when using `template.*.chunks`
+ * @param {Bool=} template.condition - if false will render nothing
+ * @param {String} template.template - template string for the rendered content
+ * @param {Function=} template.update called for each element of the array
+ * with two parameters:
+ * `template.update(renderedContent, template.array[i])`
+ * Note that update may be called asynchronously when using `template.chunks`
+ * @param {String=} id - key to identify rendered content; only required if
+ * you want multiple dynTemplates under the same parent
+ * @return {DocumentFragment|dynTemplate} cloned from the created
+ * template, or the processor of a DynTemplate if passed an object for a
+ * dynamic template.
  */
-shadowQuery.template = function(node, template) {
-	if(node.getTemplate) return;
-	if(typeof(template) === 'string') template = {'default': template};
-	createTemplate(node, template);
-	node.constructor.prototype.getTemplate = function(name = 'default', patch) {
-		if(patch && template[name].patch) return template[name].patch(patch);
-		if(template[name] instanceof DynTemplate) return template[name].process;
-		return template[name].content.cloneNode(true);
-	};
-	Object.defineProperty(node.constructor.prototype, 'template', {
-		get: function() {return this.getTemplate();},
-	});
-};
-
-function createTemplate(node, template) {
-	for(let name of Object.keys(template)) {
-		if(typeof template[name] === 'string') {
-			const tmpl = document.createElement('template');
-			tmpl.innerHTML = template[name];
-		// document.body.appendChild(tmpl);
-			template[name] = tmpl;
+shadowQuery.template = function(template) {
+	if(typeof template === 'string') {
+		if(templates[template]) {
+			return templates[template].content.cloneNode(true);
 		}
-		else template[name] = new DynTemplate(node, template[name], name);
+		const tmpl = document.createElement('template');
+		tmpl.innerHTML = template;
+	// document.body.appendChild(tmpl);
+		templates[template] = tmpl;
+		return tmpl.content.cloneNode(true);
 	}
+	else return dynTemplate(template);
 }
 
-class DynTemplate {
-	constructor(node, template, key) {
-		this._node = node;
-		this._template = this.__template = template;
-		this._key = key;
-		this.process = this._unpatched.bind(this);
-		this.__patched = this._patched.bind(this);
-	}
+function dynTemplate(template) {
+	const {array = [undefined], chunks, id = 'default', update} = template;
+	const tmpl = template.template;
+	const dynNodeKey = `_shadowQueryChildArrayDynNode${id}`;
+	const timeoutKey = `_shadowQueryChildArrayTimeout${id}`;
 
-	patch(patch) {
-		this.__template = Object.assign(patch, this._template);
-		return this.__patched;
-	}
-
-	_unpatched(parent, callback) {
-		this._attachDynNodes(this._template, parent, callback);
-	}
-
-	_patched(parent, callback) {
-		this._attachDynNodes(this.__template, parent, callback);
-	}
-
-	_attachDynNodes(tmpl, parent, callback) {
-		const array = this._getArray(tmpl);
-		if(parent[this._timeoutKey]) {
-			clearTimeout(parent[this._timeoutKey]);
-			delete parent[this._timeoutKey];
+	return function(parent, callback) {
+		if(parent[timeoutKey]) {
+			clearTimeout(parent[timeoutKey]);
+			delete parent[timeoutKey];
 		}
-		if(!parent[this._dynNodeKey]) parent[this._dynNodeKey] =  [];
-		let nodes =  parent[this._dynNodeKey];
-		if(!this._condition(tmpl)) return this._removeNodes(parent, 0, nodes);
-		else if(nodes.length > array.length) {
-			this._removeNodes(parent, array.length, nodes);
+		if(!parent[dynNodeKey]) parent[dynNodeKey] =  [];
+		let nodes =  parent[dynNodeKey];
+		if(template.hasOwnProperty('condition') && !template.condition) {
+			return removeNodes(0);
 		}
-		this._iterDynNodeChunk(0, tmpl, array, parent, callback);
-	}
+		else if(nodes.length > array.length) removeNodes(array.length);
+		iterDynNodeChunk(0);
 
-	_getArray(template) {
-		if(!template.array) return [undefined];
-		if(typeof(template.array) === 'function') return template.array();
-		return template.array;
-	}
-
-	_condition(tmpl) {
-		return !tmpl.hasOwnProperty('condition') || (
-			(typeof(tmpl.condition) === 'function') ?
-			tmpl.condition() : tmpl.condition
-		);
-	}
-
-	_removeNodes(parent, from, nodes) {
-		for(let i = from; i < nodes.length; i++) {
-			for(let j = 0; j < nodes[i].length; j++) {
-				parent.removeChild(nodes[i][j]);
+		function removeNodes(from) {
+			for(let i = from; i < nodes.length; i++) {
+				for(let j = 0; j < nodes[i].length; j++) {
+					parent.removeChild(nodes[i][j]);
+				}
 			}
+			nodes.splice(from);
 		}
-		nodes.splice(from);
-	}
 
-	_iterDynNodeChunk(idx, tmpl, array, parent, callback) {
-		const {chunks} = tmpl;
-		if(idx >= array.length) return;
-		if(chunks && !(idx % chunks)) {
-			parent[this._timeoutKey] = setTimeout(() => {
-				this._iterNodeArray(idx, tmpl, array, parent, callback);
-			});
+		function iterDynNodeChunk(idx) {
+			if(idx >= array.length) return;
+			if(chunks && !(idx % chunks)) {
+				parent[timeoutKey] = setTimeout(() => iterNodeArray(idx));
+			}
+			else {iterNodeArray(idx);}
 		}
-		else {this._iterNodeArray(idx, tmpl, array, parent, callback);}
-	}
 
-	_iterNodeArray(idx, tmpl, array, parent, callback) {
-		let {template, update} = tmpl;
-		let currentNode = parent[this._dynNodeKey][idx];
-		if(!currentNode) {
-			template = this._node.getTemplate(template);
-			currentNode = $(template.children);
-			callback(template);
-			parent[this._dynNodeKey].push(currentNode);
+		function iterNodeArray(idx) {
+			let currentNode = parent[dynNodeKey][idx];
+			if(!currentNode) {
+				const tmp = $.template(tmpl);
+				currentNode = $(tmp.children);
+				callback(tmp);
+				parent[dynNodeKey].push(currentNode);
+			}
+			if(update) update($(currentNode), array[idx], idx);
+			delete parent[timeoutKey];
+			iterDynNodeChunk(++idx);
 		}
-		if(update) update($(currentNode), array[idx], idx);
-		delete parent[this._timeoutKey];
-		this._iterDynNodeChunk(++idx, tmpl, array, parent, callback);
-	}
-
-	get _dynNodeKey() {return `_shadowQueryChildArrayDynNode${this._key}`;}
-	get _timeoutKey() {return `_shadowQueryChildArrayTimeout${this._key}`;}
+	};
 }
 
+/*
+ * `shadowQuery.shadow` is just a shorthand for
+ * `this.attachShadow(options).appendChild($.template(template));`. You
+ * will likely do something like this in the majority of your web
+ * component's connectedCallbacks.
+ * @example
+ * connectedCallback() {$.shadow(this, 'Hello world!');}
+ * @static
+ * @function shadow
+ * @param {CustomElement} node - usually `this`
+ * @param {String|Object} template passed to 
+ * {@link module:shadowQuery.template $.template}
+ * @param {Object=} options passed to attachShadow
+ */
+shadowQuery.shadow = function(node, template, options = {mode: 'open'}) {
+	node.attachShadow(options).appendChild($.template(template));
+}
 
 /*
  * This will create `this._shadowQueryChange = {}` and track changes there.

@@ -19,9 +19,9 @@ const sqTemplate = `
 `;
 
 customElements.define('sq-monster', class extends HTMLElement {
-	constructor() {super(); $.template(this, sqTemplate);}
+	constructor() {super();}
 	connectedCallback() {
-		this.attachShadow({mode: 'open'}).appendChild(this.template);
+		$.shadow(this, sqTemplate);
 		this._$slider = $(this, 'sq-slider');
 		this._data = iniData();
 		this._table = $(this, 'sq-table')[0];
@@ -87,9 +87,9 @@ const sliderTemplate = `
 `;
 
 customElements.define('sq-slider', class extends HTMLElement {
-	constructor() {super(); $.template(this, sliderTemplate);}
+	constructor() {super();}
 	connectedCallback() {
-		this.attachShadow({mode: 'open'}).appendChild(this.template);
+		$.shadow(this, sliderTemplate);
 		$(this, 'input').on('input', this._update.bind(this));
 		this._update();
 	}
@@ -179,26 +179,18 @@ const  rowTemplate = `<tr>\
 </tr>`;
 
 customElements.define('sq-table', class extends HTMLElement {
-	constructor() {
-		super();
-		$.template(this, {
-			'default':tableTemplate,
-			'rows': this._rowsTemplate,
-			'row': rowTemplate,
-		});
-	}
-	connectedCallback() {
-		this.attachShadow({mode: 'open'}).appendChild(this.template);
-	}
+	constructor() {super();}
+	connectedCallback() {$.shadow(this, tableTemplate);}
 	initialize(data) {
 		this.data = data;
-		$(this, 'table').append(this.getTemplate('rows'));
+		$(this, 'table').append($.template({
+			array   : data,
+			template: rowTemplate,
+			update  : (row, data) => row.query('td:first-child').text(data[0]),
+		}));
 		this._iniAccessors();
 	}
 	get _rowsTemplate() {return {
-		array   : () => this.data,
-		template: 'row',
-		update  : (row, data) => row.query('td:first-child').text(data[0]),
 	};}
 	_iniAccessors() {
 		const row = $(this, 'tr');
@@ -249,7 +241,7 @@ const statsTemplate = `
 customElements.define('sq-stats', class extends HTMLElement {
 	constructor() {super(); $.template(this, statsTemplate);}
 	connectedCallback() {
-		this.attachShadow({mode: 'open'}).appendChild(this.template);
+		$.shadow(this, statsTemplate);
 		this._$fps = $(this, 'div:nth-child(2) span');
 		this._$mem = $(this, 'div:nth-child(3) span');
 		this._samples = 0;
