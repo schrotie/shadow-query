@@ -59,7 +59,7 @@ export class ShadowQuery extends Array {
 	after(nodes) {
 		for(let node of this) {
 			if(node === node.parentNode.lastChild) {
-				toNodes(node, nodes, n => node.appendChild(n));
+				toNodes(node, nodes, n => node.parentNode.appendChild(n));
 			}
 			else toNodes(
 				node, nodes, n => node.parentNode.insertBefore(n, node.nextSibling)
@@ -132,6 +132,7 @@ export class ShadowQuery extends Array {
 	 */
 	hasClass(className) {
 		for(let node of this) if(node.classList.contains(className)) return true;
+		return false;
 	}
 
 	/**
@@ -213,12 +214,10 @@ export class ShadowQuery extends Array {
 	 */
 	prepend(nodes) {
 		for(let node of this) {
-			if(node === node.parentNode.lastChild) {
-				toNodes(node, nodes, n => node.appendChild(n));
+			if(node.firstChild) {
+				toNodes(node, nodes, n => node.insertBefore(n, node.firstChild));
 			}
-			else toNodes(
-				node, nodes, n => node.parentNode.insertBefore(n, node.firstChild)
-			);
+			else toNodes(node, nodes, n => node.appendChild(n));
 		}
 		return this;
 	}
@@ -332,7 +331,10 @@ const $ = shadowQuery;
 
 function toNodes(parent, nodes, callback) {
 	if(nodes instanceof Node) return callback(nodes);
-	if(typeof(nodes) === 'function') return nodes(parent, callback);
+	if(typeof(nodes) === 'function') {
+		if(nodes.name == 'processDynNodes') return nodes(parent, callback);
+		else return callback(nodes());
+	}
 	if(!(nodes instanceof Array)) nodes = new ShadowQuery(nodes);
 	for(let node of nodes) callback(node);
 }
@@ -436,7 +438,7 @@ function dynTemplate(template) {
 	const dynNodeKey = `_shadowQueryChildArrayDynNode${id}`;
 	const timeoutKey = `_shadowQueryChildArrayTimeout${id}`;
 
-	return function(parent, callback) {
+	return function processDynNodes(parent, callback) {
 		if(parent[timeoutKey]) {
 			clearTimeout(parent[timeoutKey]);
 			delete parent[timeoutKey];
