@@ -137,19 +137,24 @@ export class ShadowQuery extends Array {
 
 	/**
 	 * unregister an event handler on all selected nodes; support attribute
-	 * value change events
-	 * @param {String} evt event name to pass to addEventListener. To listen
-	 * to attribute changes do 'attr:name'. This will create a MutationObserver
-	 * for changes of the attribute called 'name'.
-	 * @param {Function} callback function to call on event
+	 * value, property- and text change events (see
+	 * {@link module:shadowQuery.ShadowQuery#on ShadowQuery.on});
+	 * @param {String} evt event name to pass to removeEventListener. To stop
+	 * listening to attribute changes do `attr:name`, for properties `prop:name`,
+	 * for text use `text:`
+	 * @param {Function} callback function to unregister
 	 * @return {ShadowQuery} this for chaining
 	 */
 	off(evt, callback) {
 		for(let node of this) {
 			if(/^attr:/.test(evt)) {
-			// TODO
-			// (new MutationObserver(callback)).observe(node,
-			// {attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]});
+				try{node[obsKey(attrFilter(evt))][callback].disconnect();}
+				catch(e) {}
+			}
+			else if(/^prop:/.test(evt)) offProp(node, evt, callback);
+			else if(/^text:/.test(evt)) {
+				try{node[obsKey(textFilter())][callback].disconnect();}
+				catch(e) {}
 			}
 			else node.removeEventListener(evt, callback);
 		}
@@ -157,8 +162,42 @@ export class ShadowQuery extends Array {
 	}
 
 	/**
-	 * register an event handler on all selected nodes; support attribute
-	 * value change events
+	 * register an event handler on all selected nodes
+	 *
+	 * This is a very powerful utility: you can register standard event handlers.
+	 * In this case it's just a shorthand for
+	 *
+	 * ```js
+	 * node.addEventListener(evt, callback)
+	 * ```
+	 *
+	 * However, you can thus also manage attribute-, property- and text event
+	 * handlers. Attribute and text event handlers are implemented as
+	 * MutationObservers. Property event handlers add getter and setter
+	 * methods to the object instance. It is done on the instance and not on the
+	 * prototype in order to less likely interfere with getters and setters
+	 * implemented in the class. ShadowQuery should - but currently doesn't -
+	 * handle those. I recommend not using property event handlers on components
+	 * that you do not own yourself. Properties are the most efficient way of
+	 * data binding, but they don't support it well. Attribute- and text event
+	 * handlers are no problem and should be the preferred way of interacting
+	 * with third party components. If an independent or third party component
+	 * does use properties to interact with its surrounding - which is perfectly
+	 * reasonable - it _should_ emit standart events in order notify client code
+	 * of changes.
+	 *
+	 * Another peculiarity with property event handlers:
+	 * When your web component has custom properties, it will usually want to
+	 * react to changes of the properties. To this end you implement setter
+	 * methods. Now it can happen that something instantiates your element and
+	 * sets a property _before_ your element is registered. In these cases the
+	 * property will be written as an instance property _over_ the setter method
+	 * (which comes later!). This is a trivial problem but easy to miss and
+	 * somewhat tedious to work around. If you use `$(this).on('myProperty')`,
+	 * ShadowQuery will take care of this for you. However: don't implement
+	 * getters and/or setters for you properties, ShadowQuery will do that!
+	 * Just register your event handlers with it!
+	 *
 	 * @example
 	 * $(this, 'button').on(
 	 * 	'click',
@@ -168,18 +207,26 @@ export class ShadowQuery extends Array {
 	 * 	'attr:hello',
 	 * 	this._onHelloAtributeChange.bind(this)
 	 * );
+	 * $(this, ':host').on(
+	 * 	'prop:hello',
+	 * 	this._onHelloPropertyChange.bind(this)
+	 * );
+	 * $(this, 'label').on(
+	 * 	'text:',
+	 * 	this._onLabelTextChange.bind(this)
+	 * );
 	 * @param {String} evt event name to pass to addEventListener. To listen
 	 * to attribute changes do 'attr:name'. This will create a MutationObserver
-	 * for changes of the attribute called 'name'.
+	 * for changes of the attribute called 'name'. For properties `prop:name`,
+	 * for text use `text:`
 	 * @param {Function} callback function to call on event
 	 * @return {ShadowQuery} this for chaining
 	 */
 	on(evt, callback) {
 		for(let node of this) {
-			if(/^attr:/.test(evt)) {
-				(new MutationObserver(callback)).observe(node,
-				{attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]});
-			}
+			if(/^text:$/.test(evt)) observer(node, callback, textFilter());
+			else if(/^attr:/.test(evt)) observer(node, callback, attrFilter(evt));
+			else if(/^prop:/.test(evt)) onProp(node, evt, callback);
 			else node.addEventListener(evt, callback);
 		}
 		return this;
@@ -187,20 +234,27 @@ export class ShadowQuery extends Array {
 
 	/**
 	 * register an event handler on all selected nodes; support attribute
-	 * value change events; callback will be called at most once; Note:
-	 * this is called "one" in jQuery. For once I deviate from jQuery since
+	 * value, property- and text change events (see
+	 * {@link module:shadowQuery.ShadowQuery#on ShadowQuery.on});
+	 * callback will be called at most once; Note:
+	 * this is called "one" in jQuery. For _once_ I deviate from jQuery since
 	 * the name is IMHO a bad choice. Instead I use the better name established
 	 * in node.js
 	 * @param {String} evt event name to pass to addEventListener. To listen
 	 * to attribute changes do 'attr:name'. This will create a MutationObserver
-	 * for changes of the attribute called 'name'.
+	 * for changes of the attribute called 'name'. For properties `prop:name`,
+	 * for text use `text:`
 	 * @param {Function} callback function to call on event
 	 * @return {ShadowQuery} this for chaining
 	 */
 	once(evt, callback) {
 		for(let node of this) {
-			if(/^attr:/.test(evt)) onceObserver(node, evt, callback);
-			else                   onceListener(node, evt, callback);
+			if(/^text:$/.test(evt)) onceObserver(node, callback, textFilter());
+			else if(/^attr:/.test(evt)) {
+				onceObserver(node, callback, attrFilter(evt));
+			}
+			else if(/^prop:/.test(evt)) onceProp(node, evt, callback);
+			else onceListener(node, evt, callback);
 		}
 		return this;
 	}
@@ -356,16 +410,72 @@ function onceListener(node, evt, callback) {
 	}
 }
 
-function onceObserver(node, evt, callback) {
-	const observer = new MutationObserver(_onceObserver);
-	observer.observe(
-		node,
-		{attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]}
-	);
-	function _onceObserver(...rest) {
-		observer.disconnect();
+function attrFilter(evt) {
+	return {attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]};
+}
+function textFilter() {return {characterData: true, subtree:true};}
+
+function onceObserver(node, callback, opt) {
+	const obs = observer(node, function(...rest) {
+		obs.disconnect();
+		callback(...rest);
+	}, opt, callback);
+}
+
+function observer(node, callback, opt, origCb = callback) {
+	const observer = new MutationObserver(callback);
+	observer.observe(node, opt);
+	if(!node[obsKey(opt)]) node[obsKey(opt)] = {[origCb]:observer};
+	else node[obsKey(opt)][origCb] = observer;
+	return observer;
+}
+function obsKey(opt) {return `_shadowQueryObserver${JSON.stringify(opt)}`;}
+
+// TODO property handlers should handle getters/setter on the node prototype
+function offProp(node, evt, callback) {
+	if(!node[propKey(evt)]) return;
+	const listener = node[propKey(evt)].listener;
+	listener.splice(listener.indexOf(callback), 1);
+	if(listener.length) return;
+	const value = node[propKey(evt)].value;
+	delete node[propKey(evt)];
+	const key = evt.replace(/^prop:/, '');
+	delete node[key];
+	node[key] = value;
+}
+
+function onProp(node, evt, callback) {prop(node, evt, callback);}
+
+function onceProp(node, evt, callback) {
+	prop(node, evt, _onceListener);
+	function _onceListener(...rest) {
+		offProp(node, evt, _onceListener);
 		callback(...rest);
 	}
+}
+function prop(node, evt, callback) {
+	const pKey = propKey(evt);
+	if(!node[pKey]) node[pKey] = {listener: []};
+	node[pKey].listener.push(callback);
+	const key = evt.replace(/^prop:/, '');
+	if(node.hasOwnProperty(key)) {
+		node[pKey].value = node[key];
+		delete node[key];
+	}
+	Object.defineProperty(node, key, {
+		get: function() {return node[pKey].value;},
+		set: function(value) {
+			node[pKey].value = value;
+			tell(node, node[pKey], evt);
+			return value;
+		},
+		enumerable: true,
+		configurable: true,
+	});
+}
+function propKey(prop) {return `_shadowQueryProp${prop}`;}
+function tell(node, prop, evt) {
+	for(let listener of prop.listener) listener(prop.value, node, evt);
 }
 
 function shadow(node) {return node.shadowRoot || node;}
@@ -407,13 +517,16 @@ const templates = {};
  * @param {Number=} template.chunks if passed renders `chunks` elements and
  * then calls `setTimeout` before continuing
  * @param {Bool=} template.condition - if false will render nothing
+ * @param {Function=} template.done - called when finished; optionally use
+ * together with `template.chunks`; `template.done` will never be called, if
+ * another dyn-template is rendered before this finished
  * @param {String} template.template - template string for the rendered content
  * @param {Function=} template.update called for each element of the array
  * with two parameters:
  * `template.update(renderedContent, template.array[i])`
  * Note that update may be called asynchronously when using `template.chunks`
- * @param {String=} template.id - key to identify rendered content; only required if
- * you want multiple dynTemplates under the same parent
+ * @param {String=} template.id - key to identify rendered content; only
+ * required if you want multiple dynTemplates under the same parent
  * @return {DocumentFragment|dynTemplate} cloned from the created
  * template, or the processor of a DynTemplate if passed an object for a
  * dynamic template.
@@ -430,7 +543,7 @@ shadowQuery.template = function(template) {
 		return tmpl.content.cloneNode(true);
 	}
 	else return dynTemplate(template);
-}
+};
 
 function dynTemplate(template) {
 	const {array = [undefined], chunks, id = 'default', update} = template;
@@ -461,7 +574,10 @@ function dynTemplate(template) {
 		}
 
 		function iterDynNodeChunk(idx) {
-			if(idx >= array.length) return;
+			if(idx >= array.length) {
+				if(template.done) template.done();
+				return;
+			}
 			if(chunks && !(idx % chunks)) {
 				parent[timeoutKey] = setTimeout(() => iterNodeArray(idx));
 			}
@@ -483,25 +599,31 @@ function dynTemplate(template) {
 	};
 }
 
-/*
+/**
  * `shadowQuery.shadow` is just a shorthand for
- * `this.attachShadow(options).appendChild($.template(template));`. You
- * will likely do something like this in the majority of your web
+ * ```js
+ * this.attachShadow(options).appendChild($.template(template))
+ * ```
+ * You will likely do something like this in the majority of your web
  * component's connectedCallbacks.
+ *
  * @example
  * connectedCallback() {$.shadow(this, 'Hello world!');}
  * @static
  * @function shadow
  * @param {CustomElement} node - usually `this`
- * @param {String|Object} template passed to 
+ * @param {String|Object} template passed to
  * {@link module:shadowQuery.template $.template}
  * @param {Object=} options passed to attachShadow
+ * @return {ShadowRoot} shadowRoot
  */
 shadowQuery.shadow = function(node, template, options = {mode: 'open'}) {
-	node.attachShadow(options).appendChild($.template(template));
-}
+	const s = node.attachShadow(options);
+	s.appendChild($.template(template));
+	return s;
+};
 
-/*
+/**
  * This will create `this._shadowQueryChange = {}` and track changes there.
  * It calls `JSON.stringify(value)` and stores that under `key` for later
  * comparison.
@@ -510,6 +632,8 @@ shadowQuery.shadow = function(node, template, options = {mode: 'open'}) {
  * @static
  * @function changed
  * @param {Node} node component to work on, usually `this`
+ * @param {Object} change key-value pairs of potentially changed things;
+ * checks the values for changes and records the last version under key
  * @return {boolean} true if something changed
  */
 shadowQuery.changed = function(node, change) {
@@ -546,43 +670,4 @@ shadowQuery.noSelf = function(callback) {
 		callback();
 		calling = false;
 	};
-};
-
-/**
- * When your web component has custom properties, it will usually want to
- * react to changes of the properties. To this end you implement setter
- * methods. Now it can happen that something instantiates your element and
- * sets a property _before_ your element is registered. In these cases the
- * property will be written as an instance property _over_ the setter method
- * (which comes later!). This is a trivial problem but easy to miss and
- * somewhat tedious to work around. ShadowQuery to the rescue.
- * @example
- * constructor() {
- * 	super();
- * 	$.properties({hello: 'Hello world!');
- * 	console.log(this.hello); // -> 'Hello world!'
- * }
- * // Do `$.properties({hello: undefined)};` to
- * // bypass default value initialization, but
- * // still keep up with properties set before
- * // registration.
- * @static
- * @function properties
- * @param {Node} node component to initialize, usually `this`
- * @param {Object} properties key-default-value pairs
- * @return {undefined} undefined
- */
-shadowQuery.properties = function(node, properties) {
-	for(let key of Object.keys(properties)) {
-		if(node.hasOwnProperty(key)) {
-			const value = node[key];
-			delete node[key];
-			node[key] = value;
-		}
-		else {
-			const prop = properties[key];
-			if(typeof(prop) === 'function') node[key] = prop();
-			else if(prop !== undefined) node[key] = prop;
-		}
-	}
 };

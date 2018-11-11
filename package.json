@@ -1,6 +1,6 @@
 {
 	"name": "shadow-query",
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"license": "MIT",
 	"author": {
 		"name": "Thorsten Roggendorf",
@@ -35,15 +35,17 @@
 		"eslint-plugin-html": "^1.7.0",
 		"jsdoc": "latest",
 		"mocha": "latest",
-		"simple-server": "latest",
+		"serve": "latest",
 		"uglify-es": "latest"
 	},
 	"scripts": {
 		"build": "npm run-script build-doc; npm run-script uglify",
 		"build-doc": "./node_modules/.bin/jsdoc --configure jsdoc.json -d documentation shadowQuery.js README.md",
 		"lint": "eslint . --ext js,html --ignore-path .gitignore",
-		"publish": "npm run-script build",
-		"uglify": "./node_modules/uglify-es/bin/uglifyjs -c -m -- shadowQuery.js > shadowQuery.min.js",
-		"test": "jest"
+		"prepare": "npm run build",
+		"start" : "${PWD}/node_modules/.bin/serve &",
+		"stop": "ps aux | grep 'shadow-query/node_modules/.bin/serve' | grep -v grep | awk '{print $2}' | xargs kill",
+		"test": "npm start; sleep 2; chromium-browser http://localhost:5000/test/test.html; sleep 5; npm stop",
+		"uglify": "./node_modules/uglify-es/bin/uglifyjs -c -m -- shadowQuery.js > shadowQuery.min.js; sed -i '1s;^;/* eslint-disable */\\n;' shadowQuery.min.js"
 	}
 }

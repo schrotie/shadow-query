@@ -33,11 +33,22 @@ describe('insertion', () => {
 		inner().children[0].localName.should.equal('p');
 	});
 
-	it('appends at end', () => {
-		const template = document.createElement('template');
-		template.innerHTML = `<p></p><p></p><p></p>`;
-		$(inner()).append(template.content.cloneNode(true));
-		inner().children.length.should.equal(3);
+	it('appends Node Array', () => {
+		const array = [
+			document.createElement('p'),
+			document.createElement('p'),
+		];
+		$(inner()).append(array);
+		inner().children.length.should.equal(2);
+		inner().children[0].localName.should.equal('p');
+	});
+
+	it('appends NodeList', () => {
+		const div = document.createElement('div');
+		div.appendChild(document.createElement('p'));
+		div.appendChild(document.createElement('p'));
+		$(inner()).append(div.childNodes);
+		inner().children.length.should.equal(2);
 		inner().children[0].localName.should.equal('p');
 	});
 

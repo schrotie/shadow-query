@@ -1,7 +1,7 @@
 # shadow-query
 Nano sized utilities library for writing vanilla web components
 
-ShadowQuery is a tiny (1.6k uglified gzip, some 270 lines of code without comments and new lines as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
+ShadowQuery is a tiny (1.9k uglified gzip, some 350 lines of code without comments and new lines as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
 
 __Tiny__: demo/dbmonster.html is a selfcontained HTML app _below 10K_ (load without server into your Chrome or Firefox, for other browsers you may need to add more polyfills).
 
@@ -50,9 +50,11 @@ This works as is in Chrome, for other browsers you may need to load polyfills un
 * Hello React!
 * Hello Vue!
 
+... and that example renders so fast, it's hard to find the 3ms time for rendering between the other stuff Chrome does on page start up.
+
 # Status
 
-ShadowQuery is currently a proof of concept. I have developed one smallish (1.5k lines) web application on it. No tests, no proven tech, an experiment.
+ShadowQuery is currently a proof of concept. I have developed one smallish (1.5k lines) web application on it. ShadowQuery now comes with a test suite that covers 100% of the lines of code. I would not recommend it for production, it needs more testing.
 
 # Intended Audience
 
@@ -64,11 +66,11 @@ So I was writing this web app of mine, starting from vanilla web components. At 
 
 These past five years I have grown increasingly suspicious of the dynamic templating done in Angular/React/Vue and almost any modern framework. Dynamic templating has become a universal pattern of modern web development. I'm not entirely sure that this is the right way to. Templates and components I have no doubt about, at all, "just" these templates with injected JavaScript. I have laid out my thoughts in more detail [here](https://medium.com/@schrotie/web-platform-to-the-rescue-c81719dd6f58).
 
-But dynamic templates are so damn convenient. I had to find out what's necessary to work without them. Turns out: a puny 270 lines of generic helper code, that's mostly straightforward shorthand for things already on the platform plus a bit of array and conditional templating. And this tiny bit of code did not just keep me barely afloat: Components written with it are concise, expressive and very readable and maintainable and - if done right - leave any framework-developed app yelping in the dust with regards to footprint an performance. Most importantly: any web developer with some worthwhile experience of working with actual DOM and Javascript can tell immediately what's going on.
+But dynamic templates are so damn convenient. I had to find out what's necessary to work without them. Turns out: a puny 350 lines of generic helper code, that's mostly straightforward shorthand for things already on the platform plus a bit of array and conditional templating. And this tiny bit of code did not just keep me barely afloat: Components written with it are concise, expressive and very readable and maintainable and - if done right - leave any framework-developed app yelping in the dust with regards to footprint an performance. Most importantly: any web developer with some worthwhile experience of working with actual DOM and Javascript can tell immediately what's going on.
 
-So that is ShadowQuery: A showcase and plea for another approach to web development. It's so tiny that there's little hurdle to using it. Costs next to nothing footprint-wise and if it breaks on you, you can easily fix it, 'cause it's just 270 lines. If you think the approach sounds interesting but don't like ShadowQuerie's syntax: great! Write your own, it's surprisingly simple.
+So that is ShadowQuery: A showcase and plea for another approach to web development. It's so tiny that there's little hurdle to using it. Costs next to nothing footprint-wise and if it breaks on you, you can easily fix it, 'cause it's just 350 lines. If you think the approach sounds interesting but don't like ShadowQuerie's syntax: great! Write your own, it's surprisingly simple.
 
-Maybe it will eventually grow to to 2K but I currently consider it complete (feature-wise, still needs fixing, syntax may change ...). The trick is: it covers the most common use case and simplifies DOM access for anything else. I won't for example implement inline style manipulation, because I consider it bad practice. But doing
+Maybe it will eventually grow to to 3K but I currently consider it complete (feature-wise, still needs more testing, fixing, syntax may change ...). The trick is: it covers the most common use case and simplifies DOM access for anything else. I won't for example implement inline style manipulation, because I consider it bad practice. But doing
 ```js
 $(this, 'a').forEach(a => a.style.textDecoration = 'none');
 // or:
@@ -83,6 +85,8 @@ $(this, 'a').css({textDecoration:'none'});
 ```sh
 npm i -s 'shadow-query'
 ```
+I recommend cloning the repository in order to get to the full API reference - see bottom of this README.
+
 # Hello world!
 
 ## Vanilla Web Component
@@ -113,15 +117,25 @@ The difference is that ShadowQuery takes the template, creates an HTMLTemplateEl
 
 # API
 
-The ShadowQuery module has two exports. The first the `ShadowQuery`. You should only use it, if you want to modify/extend shadowQuery. The other export '`shadowQuery` is also the default export. Thus `import {shadowQuery} ...` and `import shadowQuery ...` both work. I usually do `import $ ...` for brevity's sake.
+The ShadowQuery module has two exports. The first is `ShadowQuery`. You should only use it, if you want to modify/extend shadowQuery. The other export '`shadowQuery`' is also the default export. Thus `import {shadowQuery} ...` and `import shadowQuery ...` both work. I usually do `import $ ...` for brevity's sake.
 
-There are two types of APIs in ShadowQuery. There are static methods like `$.template`. All of these do something to your component-class. `$` is also a function that facilitates working with the DOM.
+There are two types of APIs in ShadowQuery. There are static methods like `$.template` (currently 4). These are general web component related helpers. Then `shadowQuery`/`$` is also a function that facilitates working with the DOM.
 
-jQuery works on the document, ShadowQuery is for web components which work on document-fragments. Thus all ShadowQuery methods expect an entry node (or several) as first argument.
+jQuery works on the document, ShadowQuery is for web components which work on document-fragments. Thus all ShadowQuery DOM methods expect an entry node (or several) as first argument.
 
-## Templates
+The whole DOM API has 4 types of methods:
+* __className__  
+`addClass`, `removeClass`, `hasClass`
+* __node insertion__  
+`append`, `prepend`, `before`, `after`
+* __value accessors__  
+`attr`, `prop`, `text`
+* __event management__  
+`on`, `off`, `once`
 
-You already saw this in the hello world example. `$.template` creates an HTMLTemplateElement once and then returns clones of its content. If you pass an object instead of a string, you can do stuff like conditional rendering and rendering arrays. We'll cover that in the last example.
+Node insertion supports templates, and templates support conditional- and array-nodes.
+
+Event management and accessors are symmetric: besides "normal" events you can register attribute, property, and text-events. ShadowQuery value accessors and event management combined provide a complete toolkit for two-way data binding. I do not recommend that, though, for anything but the smallest applications. Usually you should use something like Redux and its one way binding philosophy. However, many generic components will need to react to _their_ attribute and/or property changes and ShadowQuery has everything you need for this.
 
 ## Text Values and Chaining
 
@@ -147,10 +161,12 @@ document.registerElement('hello-world', class extends HTMLElement {
 ```
 
 `$.shadow(this, template)` is just a shorthand for
-`this.attachShadow({mode: open}).appendChild(template)`. Not much, but since
-it's used in most components ...
+```js
+this.attachShadow({mode: open}).appendChild(template)
+```
+Not much, but since it's used in most components ...
 
-The `$` method always expects a node as first argument and an optional selector as its second. It calls `(node.shadowRoot || node).querySelectorAll(selector)` and returns its DOM swiss army knife that let's you do various stuff on the result similar to jQuery. In fact, if you are familiar with jQuery you should feel pretty much at home. Be aware, though, that ShadowQuery is a tiny subset of jQuery. The former was a compatibility layer as much as a utility and it filled many holes in the platform that the platform has meanwhile caught up upon.
+The `$` method always expects a node as first argument and an optional selector as its second. It calls `(node.shadowRoot || node).querySelectorAll(selector)` and returns its DOM swiss army knife that let's you do various stuff on the result similar to jQuery. In fact, if you are familiar with jQuery you should feel pretty much at home. Be aware, though, that ShadowQuery is a tiny subset of jQuery. The former was a compatibility layer as much as a utility and it filled many holes in the platform that the platform has meanwhile caught up upon ... and ShaowQuery aims to be minimal and _only_ address the most common web component use cases.
 
 The example calls two methods in a chain: first `text` for each selected node calls `node.childNodes[0].nodeValue = text`, `text` being "Hello world!" in the example. Note that it brutally calls `childNodes[0]` if you call `text`. What it does is by far the best performing approach to change character-data in the DOM. This only works, if there already is a textNode there. In this case there is: "Hello world?" in the template. Usually I just leave an empty space where I want to manipulate nodeValues later, like so:
 
@@ -214,12 +230,14 @@ Result:
 
 # More
 
-Dynamic templates can do it bit more, chunked and/or conditional rendering for example. There's also more insertion and event helpers. For this and a more helpers/features please refer to the API reference. To view it:
+Dynamic templates can do it bit more, chunked and/or conditional rendering for example. For this and a more helpers/features please refer to the API reference. To view it:
 ```sh
 git clone https://github.com/schrotie/shadow-query
 cd shadow-query
 npm install
 npm run-script build-doc
 ```
-And then open shadow-query/documentation/index.html in your browser.
+And then open shadow-query/documentation/index.html in your browser (without server).
+
+Also checkout the demo directory that comes with the git clone. It contains a few examples on how to use ShadowQuery.
 

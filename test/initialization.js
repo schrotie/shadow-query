@@ -1,8 +1,6 @@
 import $ from '../shadowQuery.js';
 import './testComponent.js';
 
-chai.should();
-
 const dom = `\
 <span id="span"></span>\
 <button id="button"></button>\
