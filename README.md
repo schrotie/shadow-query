@@ -166,7 +166,7 @@ this.attachShadow({mode: open}).appendChild($.template(template))
 ```
 Not much, but since it's used in most components ...
 
-The `$` method always expects a node as first argument and an optional selector as its second. It calls `(node.shadowRoot || node).querySelectorAll(selector)` and returns its DOM swiss army knife that let's you do various stuff on the result similar to jQuery. In fact, if you are familiar with jQuery you should feel pretty much at home. Be aware, though, that ShadowQuery is a tiny subset of jQuery. The former was a compatibility layer as much as a utility and it filled many holes in the platform that the platform has meanwhile caught up upon ... and ShaowQuery aims to be minimal and _only_ address the most common web component use cases.
+The `$` method always expects a node as first argument and an optional selector as its second. It calls `(node.shadowRoot || node).querySelectorAll(selector)` and returns its DOM swiss army knife that let's you do various stuff on the result similar to jQuery. In fact, if you are familiar with jQuery you should feel pretty much at home. Be aware, though, that ShadowQuery is a tiny subset of jQuery. The former was a compatibility layer as much as a utility and it filled many holes in the platform that the platform has meanwhile caught up upon ... and ShadowQuery aims to be minimal and _only_ address the most common web component use cases.
 
 The example calls two methods in a chain: first `text` for each selected node calls `node.childNodes[0].nodeValue = text`, `text` being "Hello world!" in the example. Note that it brutally calls `childNodes[0]` if you call `text`. What it does is by far the best performing approach to change character-data in the DOM. This only works, if there already is a textNode there. In this case there is: "Hello world?" in the template. Usually I just leave an empty space where I want to manipulate nodeValues later, like so:
 
@@ -230,7 +230,7 @@ Result:
 
 # More
 
-Dynamic templates can do it bit more, chunked and/or conditional rendering for example. For this and a more helpers/features please refer to the API reference. To view it:
+Dynamic templates can do a bit more, chunked and/or conditional rendering for example. For this and a more helpers/features please refer to the API reference. To view it:
 ```sh
 git clone https://github.com/schrotie/shadow-query
 cd shadow-query
