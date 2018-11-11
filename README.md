@@ -162,7 +162,7 @@ document.registerElement('hello-world', class extends HTMLElement {
 
 `$.shadow(this, template)` is just a shorthand for
 ```js
-this.attachShadow({mode: open}).appendChild(template)
+this.attachShadow({mode: open}).appendChild($.template(template))
 ```
 Not much, but since it's used in most components ...
 
