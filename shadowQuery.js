@@ -364,6 +364,7 @@ export class ShadowQuery extends Array {
 			for(let node of this) node.classList.toggle(className);
 		}
 		else {
+			state = state ? true : false;
 			for(let node of this) node.classList.toggle(className, state);
 		}
 		return this;

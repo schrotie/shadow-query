@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+	<head><script type="module">
+		import $ from '../shadowQuery.js';
+
+		const sqTodoTemplate = `
+			<style>:host, :host > style ~ * {display: block;}</style>
+			<sq-todo-add></sq-todo-add>
+			<sq-todo-list></sq-todo-list>
+			<sq-todo-filter></sq-todo-filter>
+		`;
+		window.customElements.define('sq-todo', class extends HTMLElement {
+			constructor() {super();}
+			connectedCallback() {
+				$.shadow(this, sqTodoTemplate);
+				[this._add, this._list, this._filter] = $(this, 'style ~ *')
+				.map(el => $(el));
+				$(this, 'sq-todo-add, sq-todo-list').prop('sqTodo', []);
+				this._add.on('add', () => $(this, 'sq-todo-list')[0].update());
+				this._filter.on('attr:data-filter', () =>
+					this._list.prop('filter', this._filter.attr('data-filter'))
+				);
+			}
+		});
+
+		const sqTodoAddTemplate = `
+			<input></input>
+			<button>Add</button>
+		`;
+		window.customElements.define('sq-todo-add', class extends HTMLElement {
+			constructor() {super();}
+			connectedCallback() {
+				$.shadow(this, sqTodoAddTemplate);
+				$(this, 'input')
+				.on('keyup', evt => (evt.keyCode === 13) && this._add());
+				$(this, 'button').on('click', this._add.bind(this));
+			}
+			_add() {
+				const value = $(this, 'input').prop('value');
+				if(!value || (this.sqTodo.indexOf(value) !== -1)) return;
+				this.sqTodo.push({value});
+				this.dispatchEvent(new CustomEvent('add', {bubbles: true}));
+				$(this, 'input').prop('value', '');
+			}
+		});
+
+		const sqTodoListTemplate = `<ul></ul>`;
+		const sqTodoListItemTemplate = `<li><sq-todo-item></sq-todo-item></li>`;
+		window.customElements.define('sq-todo-list', class extends HTMLElement {
+			constructor() {
+				super();
+				$(this).on('prop:filter', this.update.bind(this));
+			}
+			connectedCallback() {$.shadow(this, sqTodoListTemplate);}
+			update() {$(this, 'ul').append($.template({
+				array: this.sqTodo.filter(this._filter.bind(this)),
+				template: sqTodoListItemTemplate,
+				update: this._updateItem.bind(this),
+			}));}
+			_filter(el) {
+				return !this.filter || (this.filter === 'all') ||
+				((this.filter === 'active'   ) && !el.done) ||
+				((this.filter === 'completed') && el.done);
+			}
+			_updateItem(node, todo) {
+				$(node[0].firstChild, ':host').prop('sqTodo', todo);
+			}
+		});
+
+		const sqTodoItemTemplate = `
+			<style>
+				label {cursor: pointer;}
+				label.done {text-decoration: line-through;}
+			</style>
+			<label> </label>
+		`;
+		window.customElements.define('sq-todo-item', class extends HTMLElement {
+			constructor() {
+				super();
+				$(this).on('prop:sqTodo', this._update.bind(this));
+				$(this).on('click', this._click.bind(this));
+			}
+			connectedCallback() {
+				$.shadow(this, sqTodoItemTemplate);
+				this._update();
+			}
+			_update() {
+				$(this, 'label').text(this.sqTodo && this.sqTodo.value)
+				.toggleClass('done', this.sqTodo && this.sqTodo.done);
+			}
+			_click() {
+				this.sqTodo.done = !this.sqTodo.done;
+				this._update();
+			}
+		});
+
+		const sqTodoFilterTemplate = `
+			<label>Show:</label>
+			<button disabled id="all">All</button>
+			<button id="active">Active</button>
+			<button id="completed">Completed</button>
+		`;
+		window.customElements.define('sq-todo-filter', class extends HTMLElement {
+			constructor() {super();}
+			connectedCallback() {
+				$.shadow(this, sqTodoFilterTemplate);
+				$(this, 'button').on('click', this._click.bind(this));
+			}
+			_click(evt) {
+				$(this, ':host').attr('data-filter', evt.path[0].id);
+				$(this, 'button').attr('disabled', false);
+				$(evt.path[0]).attr('disabled', true);
+			}
+		});
+	</script></head>
+	<body>
+		<sq-todo></sq-todo>
+		<style>p {max-width: 40em;}</style>
+		<p>
+			Please compare this to the react/redux todo list example:
+		</p>
+		<ul>
+			<li><a href="https://redux.js.org/basics/exampletodolist">Tutorial</a></li>
+			<li><a href="https://codesandbox.io/s/github/reduxjs/redux/tree/master/examples/todos">Sandbox</a></li>
+		</ul>
+		<p>
+			The React/Redux example has more than twice the code. That's actually fine. It uses Redux and you can scale that application all the way to Facebook. Seriously, I absolutely recommend you use Redux! This would possibly bring the ShadowQuery todo list another 50 lines closer to the React example, but still not close.<br/>
+			You also need a lot of structure for complex applications, and React provides that, so really: twice the code size is fine. However, the conviction that mixing template and code is much more expressive than writing imperative components does not stand up. Not at all!
+		</p>
+		<p>
+			Then there's performance ... hell! Loading the React todo list through Chrome profiler (just the todo app, not the sandbox!) shows it to need well over 500ms of scripting time for start up. Seriously? ShadowQuery todo uses some 70ms. And if you look more closely, you find that most of that is Chrome built in boilerplate, the time actually spent for the ShadowQuery-todo-specific initialization is more like 5ms. Yes, really. A factor of 100.
+		</p>
+		<p>
+			Finally there's readability. The React approach may be debatable. Let's concede that maintainability trumps being able to directly tell how template and code interact. Still React creates a language of its own while ShadowQuery uses just vanilla JavaScript - which virtually every developer should be able to read without ever having seen ShadowQuery. That's because it's just a relatively simple and small library of a few shorthands for web component boilerplate.
+		</p>
+	</body>
+</html>
