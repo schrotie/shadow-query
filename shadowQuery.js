@@ -321,10 +321,7 @@ export class ShadowQuery extends Array {
 	 */
 	prop(name, value) {
 		if(arguments.length === 1) return this[0][name];
-		if((value === undefined) || (value === false)) {
-			for(let node of this) delete node[name];
-		}
-		else for(let node of this) node[name] = value;
+		for(let node of this) node[name] = value;
 		return this;
 	}
 
