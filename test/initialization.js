@@ -31,6 +31,8 @@ describe('new ShadowQuery', () => {
 	}); it('initializes from HTMLCollection', () => {
 		$(body.children               )[0].should.equal(id('span'));
 		$(body.children               )[2].should.equal(id('div'));
+	}); it('initializes from String', () => {
+		($('<span></span>')[0] instanceof DocumentFragment).should.equal(true);
 	}); it('excecutes basic selectors', () => {
 		$(body, 'span'                )[0].should.equal(id('span'  ));
 		$(body, 'button'              )[0].should.equal(id('button'));

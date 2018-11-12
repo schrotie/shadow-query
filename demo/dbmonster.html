@@ -21,7 +21,7 @@ const sqTemplate = `
 customElements.define('sq-monster', class extends HTMLElement {
 	constructor() {super();}
 	connectedCallback() {
-		$.shadow(this, sqTemplate);
+		$(this).shadow(sqTemplate);
 		this._$slider = $(this, 'sq-slider');
 		this._data = iniData();
 		this._table = $(this, 'sq-table')[0];
@@ -89,7 +89,7 @@ const sliderTemplate = `
 customElements.define('sq-slider', class extends HTMLElement {
 	constructor() {super();}
 	connectedCallback() {
-		$.shadow(this, sliderTemplate);
+		$(this).shadow(sliderTemplate);
 		$(this, 'input').on('input', this._update.bind(this));
 		this._update();
 	}
@@ -180,14 +180,14 @@ const  rowTemplate = `<tr>\
 
 customElements.define('sq-table', class extends HTMLElement {
 	constructor() {super();}
-	connectedCallback() {$.shadow(this, tableTemplate);}
+	connectedCallback() {$(this).shadow(tableTemplate);}
 	initialize(data) {
 		this.data = data;
-		$(this, 'table').append($.template({
+		$(this, 'table').append({
 			array   : data,
 			template: rowTemplate,
 			update  : (row, data) => row.query('td:first-child').text(data[0]),
-		}));
+		});
 		this._iniAccessors();
 	}
 	_iniAccessors() {
@@ -237,9 +237,9 @@ const statsTemplate = `
 `;
 
 customElements.define('sq-stats', class extends HTMLElement {
-	constructor() {super(); $.template(this, statsTemplate);}
+	constructor() {super();}
 	connectedCallback() {
-		$.shadow(this, statsTemplate);
+		$(this).shadow(statsTemplate);
 		this._$fps = $(this, 'div:nth-child(2) span');
 		this._$mem = $(this, 'div:nth-child(3) span');
 		this._samples = 0;

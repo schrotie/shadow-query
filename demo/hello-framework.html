@@ -18,12 +18,12 @@
 				$(this).on('click', () => alert('ShadowQuery loves you!'));
 			}
 			connectedCallback() {
-				$.shadow(this, template);
-				$(this, 'ul').append($.template({
+				$(this).shadow(template);
+				$(this, 'ul').append({
 					array   : $(this, ':host').attr('greet').split(' '),
 					template: '<li> </li>',
 					update  : (li, item) => li.text(`Hello ${item}!`),
-				}));
+				});
 			}
 		});
 	</script></head>

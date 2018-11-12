@@ -12,7 +12,7 @@
 		window.customElements.define('sq-todo', class extends HTMLElement {
 			constructor() {super();}
 			connectedCallback() {
-				$.shadow(this, sqTodoTemplate);
+				$(this).shadow(sqTodoTemplate);
 				[this._add, this._list, this._filter] = $(this, 'style ~ *')
 				.map(el => $(el));
 				$(this, 'sq-todo-add, sq-todo-list').prop('sqTodo', []);
@@ -30,7 +30,7 @@
 		window.customElements.define('sq-todo-add', class extends HTMLElement {
 			constructor() {super();}
 			connectedCallback() {
-				$.shadow(this, sqTodoAddTemplate);
+				$(this).shadow(sqTodoAddTemplate);
 				$(this, 'input')
 				.on('keyup', evt => (evt.keyCode === 13) && this._add());
 				$(this, 'button').on('click', this._add.bind(this));
@@ -51,12 +51,12 @@
 				super();
 				$(this).on('prop:filter', this.update.bind(this));
 			}
-			connectedCallback() {$.shadow(this, sqTodoListTemplate);}
-			update() {$(this, 'ul').append($.template({
+			connectedCallback() {$(this).shadow(sqTodoListTemplate);}
+			update() {$(this, 'ul').append({
 				array: this.sqTodo.filter(this._filter.bind(this)),
 				template: sqTodoListItemTemplate,
 				update: this._updateItem.bind(this),
-			}));}
+			});}
 			_filter(el) {
 				return !this.filter || (this.filter === 'all') ||
 				((this.filter === 'active'   ) && !el.done) ||
@@ -81,7 +81,7 @@
 				$(this).on('click', this._click.bind(this));
 			}
 			connectedCallback() {
-				$.shadow(this, sqTodoItemTemplate);
+				$(this).shadow(sqTodoItemTemplate);
 				this._update();
 			}
 			_update() {
@@ -103,7 +103,7 @@
 		window.customElements.define('sq-todo-filter', class extends HTMLElement {
 			constructor() {super();}
 			connectedCallback() {
-				$.shadow(this, sqTodoFilterTemplate);
+				$(this).shadow(sqTodoFilterTemplate);
 				$(this, 'button').on('click', this._click.bind(this));
 			}
 			_click(evt) {

@@ -30,12 +30,12 @@ __High Performance__: shadow-query dbmonster ist among the fastest dbmonsters ou
 				$(this).on('click', () => alert('ShadowQuery loves you!'));
 			}
 			connectedCallback() {
-				$.shadow(this, template);
-				$(this, 'ul').append($.template({
+				$(this).shadow(template);
+				$(this, 'ul').append({
 					array   : $(this, ':host').attr('greet').split(' '),
 					template: '<li> </li>',
 					update  : (li, item) => li.text(`Hello ${item}!`),
-				}));
+				});
 			}
 		});
 	</script></head>
@@ -108,7 +108,7 @@ window.customElements.define('hello-world', class extends HTMLElement {
 		super();
 	}
 	connectedCallback() {
-		$.shadow(this, 'Hello world!');
+		$(this).shadow('Hello world!');
 	}
 });
 ```
@@ -119,21 +119,20 @@ The difference is that ShadowQuery takes the template, creates an HTMLTemplateEl
 
 The ShadowQuery module has two exports. The first is `ShadowQuery`. You should only use it, if you want to modify/extend shadowQuery. The other export '`shadowQuery`' is also the default export. Thus `import {shadowQuery} ...` and `import shadowQuery ...` both work. I usually do `import $ ...` for brevity's sake.
 
-There are two types of APIs in ShadowQuery. There are static methods like `$.template` (currently 4). These are general web component related helpers. Then `shadowQuery`/`$` is also a function that facilitates working with the DOM.
-
-jQuery works on the document, ShadowQuery is for web components which work on document-fragments. Thus all ShadowQuery DOM methods expect an entry node (or several) as first argument.
+So lets assume you did `import $ from '.../shadowQuery.js';`. Now `$` is a function that takes one or two arguments and returns a `new ShadowQuery`.
+jQuery works on the document, ShadowQuery is for web components which work on document-fragments. Thus the first arguments is always an entry node (or several). The second is an optional selector. If you pass the selector the result will be that of querying the entry nodes for the selector, otherwise the result is the entry node(s). Anyway, what you get is an Array (ShadowQuery extends Array!) of nodes augmented with a couple of methods to simplify your web component developer life.
 
 The whole DOM API has 4 types of methods:
 * __className__  
 `addClass`, `removeClass`, `hasClass`
 * __node insertion__  
-`append`, `prepend`, `before`, `after`
+`append`, `prepend`, `before`, `after`, `shadow`
 * __value accessors__  
 `attr`, `prop`, `text`
 * __event management__  
 `on`, `off`, `once`
 
-Node insertion supports templates, and templates support conditional- and array-nodes.
+Node insertion supports templates, and templates support conditional- and array-nodes. Whenever you pass a string to an insertion method, ShadowQuery will create a HTMLTemplateElement, if it does not find it in its library, and furtheron generates clones from that template.
 
 Event management and accessors are symmetric: besides "normal" events you can register attribute, property, and text-events. ShadowQuery value accessors and event management combined provide a complete toolkit for two-way data binding. I do not recommend that, though, for anything but the smallest applications. Usually you should use something like Redux and its one way binding philosophy. However, many generic components will need to react to _their_ attribute and/or property changes and ShadowQuery has everything you need for this.
 
@@ -154,13 +153,13 @@ document.registerElement('hello-world', class extends HTMLElement {
 	connectedCallback() {
 		// should always do this, nodes can be connected several times!
 		if(this.shadowRoot) return;
-		$.shadow(this, template);
+		$(this).shadow(template);
 		$(this, 'span').text('Hello world!').toggleClass('checked');
 	}
 });
 ```
 
-`$.shadow(this, template)` is just a shorthand for
+`$(this).shadow(template)` is just a shorthand for
 ```js
 this.attachShadow({mode: open}).appendChild($.template(template))
 ```
@@ -211,12 +210,12 @@ This is somewhat of an acid test for code dealing with web components: every onc
 window.customElements.define('hello-framework', class extends HTMLElement {
 	constructor() {super();}
 	connectedCallback() {
-		$.shadow(this, '<ul></ul>');
-		$(this, 'ul').append($.template({
+		$(this).shadow('<ul></ul>');
+		$(this, 'ul').append({
 			array   : $(this, ':host').attr('greet').split(' '),
 			template: '<li> </li>',
 			update  : (li, item) => li.text(`Hello ${item}!`),
-		}));
+		});
 	}
 });
 ```

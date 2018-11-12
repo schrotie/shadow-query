@@ -18,24 +18,27 @@
  */
 export class ShadowQuery extends Array {
 	/** Instantiate a ShadowQuery object.
-	 * Will create an Array (this is an Array!) of nodes from node parameter.
+	 * Will create an Array (ShadowQuery is an Array!) of nodes from node
+	 * parameter.
 	 * If selector is passed, will query all nodes passed as node and the
 	 * node-array will be the concatenated result of the queries.
 	 * Note that for the node parameter, it selects node.shadowRoot by default,
 	 * if available. If you want the node and not its shadowRoot, pass ':host'
 	 * as selector.
-	 * @param {Node|Node[]|NodeList|ShadowQuery} node - the initial node(s)
+	 * @param {Node|Node[]|NodeList|ShadowQuery|String} node - the initial node(s)
 	 * @param {String=} selector - if passed will query node(s) with selector
 	 */
 	constructor(node, selector) {
 		let array;
-		if(Array.isArray(node)) array = node; // node.map(shadow);
+		if(Array.isArray(node)) array = node;
+		else if(typeof(node) === 'string') array = [shadowQuery.template(node)];
 		else if(node instanceof ShadowQuery) array = node;
 		else if(node instanceof NodeList || node instanceof HTMLCollection) {
 			array = [];
 			for(var i = 0; i < node.length; i++) array.push(node[i]);
 		}
-		else array = [shadow(node)];
+		else array = [node.shadowRoot || node];
+
 		if(selector) array = find(array, selector);
 		super(...array);
 	}
@@ -51,7 +54,8 @@ export class ShadowQuery extends Array {
 
 	/**
 	 * Insert DOM after all selected nodes
-	 * @param {Node|Node[]|ShadowQuery|$.template} nodes - DOM to insert;
+	 * @param {Node|Node[]|ShadowQuery|String|$.template} nodes - DOM to insert;
+	 * String will be transformed by calling $.template
 	 * $.template is the result of a call to
 	 * {@link module:shadowQuery.template $.template}
 	 * @return {ShadowQuery} this for chaining calls
@@ -70,7 +74,8 @@ export class ShadowQuery extends Array {
 
 	/**
 	 * Append DOM to all selected nodes
-	 * @param {Node|Node[]|ShadowQuery|$.template} nodes - DOM to insert;
+	 * @param {Node|Node[]|ShadowQuery|String|$.template} nodes - DOM to insert;
+	 * String will be transformed by calling $.template
 	 * $.template is the result of a call to
 	 * {@link module:shadowQuery.template $.template}
 	 * @return {ShadowQuery} this for chaining calls
@@ -113,7 +118,8 @@ export class ShadowQuery extends Array {
 
 	/**
 	 * Insert DOM before all selected nodes
-	 * @param {Node|Node[]|ShadowQuery|$.template} nodes - DOM to insert;
+	 * @param {Node|Node[]|ShadowQuery|String|$.template} nodes - DOM to insert;
+	 * String will be transformed by calling $.template
 	 * $.template is the result of a call to
 	 * {@link module:shadowQuery.template $.template}
 	 * @return {ShadowQuery} this for chaining calls
@@ -156,7 +162,9 @@ export class ShadowQuery extends Array {
 				try{node[obsKey(textFilter())][callback].disconnect();}
 				catch(e) {}
 			}
-			else node.removeEventListener(evt, callback);
+			else node.removeEventListener(
+				evt, callback._shadowQueryNoSelf || callback
+			);
 		}
 		return this;
 	}
@@ -198,9 +206,17 @@ export class ShadowQuery extends Array {
 	 * getters and/or setters for you properties, ShadowQuery will do that!
 	 * Just register your event handlers with it!
 	 *
+	 * Quite often an event handler changes something and directly or indirectly
+	 * triggers the event, that it handles. The noSelf option helps break this
+	 * recursion. noSelf works with all types of event handlers.
 	 * @example
 	 * $(this, 'button').on(
 	 * 	'click',
+	 * 	this._onButtonClick.bind(this)
+	 * );
+	 * $(this, 'button').on(
+	 * 	'click',
+	 * 	'noSelf',
 	 * 	this._onButtonClick.bind(this)
 	 * );
 	 * $(this, ':host').on(
@@ -219,15 +235,21 @@ export class ShadowQuery extends Array {
 	 * to attribute changes do 'attr:name'. This will create a MutationObserver
 	 * for changes of the attribute called 'name'. For properties `prop:name`,
 	 * for text use `text:`
-	 * @param {Function} callback function to call on event
+	 * @param {String|Function} noSelfOrCallback if you want to catch recursive
+	 * events pass 'noSelf', otherwise put callback here
+	 * @param {Function=} callback function to call on event
 	 * @return {ShadowQuery} this for chaining
 	 */
-	on(evt, callback) {
+	on(evt, noSelfOrCallback, callback) {
+		const noself = (arguments.length === 3)&&(noSelfOrCallback === 'noSelf');
+		if(arguments.length === 2) callback = noSelfOrCallback;
 		for(let node of this) {
-			if(/^text:$/.test(evt)) observer(node, callback, textFilter());
-			else if(/^attr:/.test(evt)) observer(node, callback, attrFilter(evt));
-			else if(/^prop:/.test(evt)) onProp(node, evt, callback);
-			else node.addEventListener(evt, callback);
+			if(/^text:$/.test(evt)) observer(node, noself, callback, textFilter());
+			else if(/^attr:/.test(evt)) {
+				observer(node, noself, callback, attrFilter(evt));
+			}
+			else if(/^prop:/.test(evt)) onProp(node, evt, noself, callback);
+			else node.addEventListener(evt, noself ? noSelf(callback) : callback);
 		}
 		return this;
 	}
@@ -254,14 +276,15 @@ export class ShadowQuery extends Array {
 				onceObserver(node, callback, attrFilter(evt));
 			}
 			else if(/^prop:/.test(evt)) onceProp(node, evt, callback);
-			else onceListener(node, evt, callback);
+			else node.addEventListener(evt, callback, {once: true});
 		}
 		return this;
 	}
 
 	/**
 	 * Insert DOM as first content of all selected nodes
-	 * @param {Node|Node[]|ShadowQuery|getTemplate} nodes - DOM to insert;
+	 * @param {Node|Node[]|ShadowQuery|String|$.template} nodes - DOM to insert;
+	 * String will be transformed by calling $.template
 	 * getTemplate is the result of a call to this.getTemplate
 	 * (see {@link module:shadowQuery.template $.template})
 	 * @return {ShadowQuery} this for chaining calls
@@ -321,6 +344,29 @@ export class ShadowQuery extends Array {
 	 */
 	removeClass(className) {
 		for(let node of this) node.classList.remove(className);
+		return this;
+	}
+
+	/**
+	 * `$(this).shadow(template)` is just a shorthand for
+	 * ```js
+	 * this.attachShadow(options).appendChild(template)
+	 * ```
+	 * You will likely do something like this in the majority of your web
+	 * component's connectedCallbacks.
+	 *
+	 * @example
+	 * connectedCallback() {$(this).shadow('Hello world!');}
+	 * @param {String=} template passed to
+	 * {@link module:shadowQuery.template $.template}
+	 * @param {Object=} options passed to attachShadow
+	 * @return {ShadowQuery} this for chaining
+	 */
+	shadow(template, options = {mode: 'open'}) {
+		for(let node of this) {
+			const s = node.attachShadow(options);
+			if(template) s.appendChild($.template(template));
+		}
 		return this;
 	}
 
@@ -386,6 +432,7 @@ const $ = shadowQuery;
 
 function toNodes(parent, nodes, callback) {
 	if(nodes instanceof Node) return callback(nodes);
+	if(nodes.constructor === Object) nodes = shadowQuery.template(nodes);
 	if(typeof(nodes) === 'function') {
 		if(nodes.name == 'processDynNodes') return nodes(parent, callback);
 		else return callback(nodes());
@@ -403,13 +450,8 @@ function find(coll, selector) {
 	return nodes;
 }
 
-function onceListener(node, evt, callback) {
-	node.addEventListener(evt, _onceListener);
-	function _onceListener(...rest) {
-		node.removeEventListener(evt, _onceListener);
-		callback(...rest);
-	}
-}
+
+////////// Events //////////
 
 function attrFilter(evt) {
 	return {attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]};
@@ -417,14 +459,14 @@ function attrFilter(evt) {
 function textFilter() {return {characterData: true, subtree:true};}
 
 function onceObserver(node, callback, opt) {
-	const obs = observer(node, function(...rest) {
+	const obs = observer(node, false, function(...rest) {
 		obs.disconnect();
 		callback(...rest);
 	}, opt, callback);
 }
 
-function observer(node, callback, opt, origCb = callback) {
-	const observer = new MutationObserver(callback);
+function observer(node, noself, callback, opt, origCb = callback) {
+	const observer = new MutationObserver(noself ? noSelf(callback, true) : callback);
 	observer.observe(node, opt);
 	if(!node[obsKey(opt)]) node[obsKey(opt)] = {[origCb]:observer};
 	else node[obsKey(opt)][origCb] = observer;
@@ -436,7 +478,7 @@ function obsKey(opt) {return `_shadowQueryObserver${JSON.stringify(opt)}`;}
 function offProp(node, evt, callback) {
 	if(!node[propKey(evt)]) return;
 	const listener = node[propKey(evt)].listener;
-	listener.splice(listener.indexOf(callback), 1);
+	listener.splice(listener.indexOf(callback._shadowQueryNoSelf||callback), 1);
 	if(listener.length) return;
 	const value = node[propKey(evt)].value;
 	delete node[propKey(evt)];
@@ -445,19 +487,17 @@ function offProp(node, evt, callback) {
 	node[key] = value;
 }
 
-function onProp(node, evt, callback) {prop(node, evt, callback);}
-
 function onceProp(node, evt, callback) {
-	prop(node, evt, _onceListener);
+	onProp(node, evt, false, _onceListener);
 	function _onceListener(...rest) {
 		offProp(node, evt, _onceListener);
 		callback(...rest);
 	}
 }
-function prop(node, evt, callback) {
+function onProp(node, evt, noself, callback) {
 	const pKey = propKey(evt);
 	if(!node[pKey]) node[pKey] = {listener: []};
-	node[pKey].listener.push(callback);
+	node[pKey].listener.push(noself ? noSelf(callback) : callback);
 	const key = evt.replace(/^prop:/, '');
 	if(node.hasOwnProperty(key)) {
 		node[pKey].value = node[key];
@@ -479,7 +519,18 @@ function tell(node, prop, evt) {
 	for(let listener of prop.listener) listener(prop.value, node, evt);
 }
 
-function shadow(node) {return node.shadowRoot || node;}
+function noSelf(callback, async) {
+	let calling;
+	return callback._shadowQueryNoSelf = function() {
+		if(calling) return;
+		calling = true;
+		callback();
+		if(async) setTimeout(function() {calling = false;});
+		else calling = false;
+	};
+}
+
+////////// Templates //////////
 
 const templates = {};
 
@@ -500,7 +551,7 @@ const templates = {};
  *
  * @example
  * connectedCallback() {
- * 	$.shadow($.template('<ul></ul>');
+ * 	$(this).shadow('<ul></ul>');
  * 	$(this, 'ul').append({
  * 		array: () => $(this, ':host').attr('greet').split(),
  * 		template: '<li></li>',
@@ -599,76 +650,3 @@ function dynTemplate(template) {
 		}
 	};
 }
-
-/**
- * `shadowQuery.shadow` is just a shorthand for
- * ```js
- * this.attachShadow(options).appendChild($.template(template))
- * ```
- * You will likely do something like this in the majority of your web
- * component's connectedCallbacks.
- *
- * @example
- * connectedCallback() {$.shadow(this, 'Hello world!');}
- * @static
- * @function shadow
- * @param {CustomElement} node - usually `this`
- * @param {String|Object} template passed to
- * {@link module:shadowQuery.template $.template}
- * @param {Object=} options passed to attachShadow
- * @return {ShadowRoot} shadowRoot
- */
-shadowQuery.shadow = function(node, template, options = {mode: 'open'}) {
-	const s = node.attachShadow(options);
-	s.appendChild($.template(template));
-	return s;
-};
-
-/**
- * This will create `this._shadowQueryChange = {}` and track changes there.
- * It calls `JSON.stringify(value)` and stores that under `key` for later
- * comparison.
- * @example
- * if($.changed(this, {key: value})) doSomething();
- * @static
- * @function changed
- * @param {Node} node component to work on, usually `this`
- * @param {Object} change key-value pairs of potentially changed things;
- * checks the values for changes and records the last version under key
- * @return {boolean} true if something changed
- */
-shadowQuery.changed = function(node, change) {
-	let changed = false;
-	if(!node._shadowQueryChanges) node._shadowQueryChanges = {};
-	for(let key of Object.keys(change)) {
-		const str = JSON.stringify(change[key]);
-		if(str !== node._shadowQueryChanges[key]) {
-			node._shadowQueryChanges[key] = str;
-			changed = true;
-		}
-	}
-	return changed;
-};
-
-/**
- * Quite often an event handler changes something and directly or indirectly
- * triggers the event, that it handles. noSelf helps break this recursion.
- * @example
- * this.addEventListener(
- * 	'click',
- * 	$.noSelf(this._handleEvent.bind(this))
- * );
- * @static
- * @function noSelf
- * @param {Function} callback function to call non-recursively
- * @return {undefined} undefined
- */
-shadowQuery.noSelf = function(callback) {
-	let calling;
-	return function() {
-		if(calling) return;
-		calling = true;
-		callback();
-		calling = false;
-	};
-};

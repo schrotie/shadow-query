@@ -9,6 +9,15 @@ function outer() {return document.getElementById('out');}
 describe('insertion', () => {
 	beforeEach(ini);
 
+	it('attaches shadow root with content', () => {
+		$(inner()).shadow(`<span data-test="foo"></span>`);
+		const shadow = inner().shadowRoot;
+		const span = shadow && shadow.firstChild;
+		(shadow !== undefined).should.equal(true);
+		(span   !== undefined).should.equal(true);
+		span.getAttribute('data-test').should.equal('foo');
+	});
+
 	it('appends node at end', () => {
 		$(outer()).append(document.createElement('div'));
 		outer().children.length.should.equal(2);

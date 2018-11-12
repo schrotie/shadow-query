@@ -4,7 +4,7 @@
 		import $ from '../shadowQuery.js';
 		window.customElements.define('hello-world', class extends HTMLElement {
 			constructor() {super();}
-			connectedCallback() {$.shadow(this, 'Hello world!');}
+			connectedCallback() {$(this).shadow('Hello world!');}
 		});
 	</script></head>
 	<body><hello-world></hello-world></body>

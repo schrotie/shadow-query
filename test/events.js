@@ -30,6 +30,19 @@ describe('events', () => {
 		evt();
 	});
 
+	it('catches a recursive event listener', done => {
+		$(foo()).on('test-event', 'noSelf', () => {evt(); done()});
+		evt();
+	});
+
+	it('unregisters a recursive event listener', done => {
+		$(foo()).on('test-event', 'noSelf', done);
+		const listener = () => done();
+		$(foo()).on('test-event', listener);
+		$(foo()).off('test-event', done);
+		evt();
+	});
+
 	it('registers several event listeners', done => {
 		$(test(), 'span').on('test-event', () => done());
 		evt();
@@ -49,6 +62,18 @@ describe('events', () => {
 
 	it('unregisters an attribute listener', done => {
 		$(foo()).on( 'attr:data-test', done);
+		$(foo()).off('attr:data-test', done);
+		attr();
+		done();
+	});
+
+	it('catches a recursive attribute listener', done => {
+		$(foo()).on('attr:data-test', 'noSelf', () => {attr(); done()});
+		attr();
+	});
+
+	it('unregisters a recursive attribute listener', done => {
+		$(foo()).on( 'attr:data-test', 'noSelf', done);
 		$(foo()).off('attr:data-test', done);
 		attr();
 		done();
@@ -78,6 +103,18 @@ describe('events', () => {
 		done();
 	});
 
+	it('catches a recursive text listener', done => {
+		$(foo()).on('text:', 'noSelf', () => {text(); done()});
+		text();
+	});
+
+	it('unregisters a recursive text listener', done => {
+		$(foo()).on( 'text:', 'noSelf', done);
+		$(foo()).off('text:', done);
+		text();
+		done();
+	});
+
 	it('registers several text listeners', done => {
 		$(test(), 'span').on('text:', () => done());
 		text();
@@ -98,7 +135,7 @@ describe('events', () => {
 	});
 
 
-	it('registers an property listener', done => {
+	it('registers a property listener', done => {
 		$(foo()).on('prop:testProp', () => done());
 		prop();
 	});
@@ -110,8 +147,20 @@ describe('events', () => {
 		prop();
 	});
 
-	it('unregisters an property listener', done => {
+	it('unregisters a property listener', done => {
 		$(foo()).on( 'prop:testProp', done);
+		$(foo()).off('prop:testProp', done);
+		prop();
+		done();
+	});
+
+	it('catches a recursive property listener', done => {
+		$(foo()).on('prop:testProp', 'noSelf', () => {prop(); done()});
+		prop();
+	});
+
+	it('unregisters a recursive property listener', done => {
+		$(foo()).on( 'prop:testProp', 'noSelf', done);
 		$(foo()).off('prop:testProp', done);
 		prop();
 		done();
