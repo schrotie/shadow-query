@@ -79,17 +79,4 @@ describe('content', () => {
 		foo().testProp.should.equal('baz');
 		bar().testProp.should.equal('baz');
 	});
-
-	it('removes property', () => {
-		$(foo()).prop('testProp', false);
-		foo().hasOwnProperty('testProp').should.equal(false);
-		$(bar()).prop('testProp', undefined);
-		bar().hasOwnProperty('testProp').should.equal(false);
-	});
-
-	it('removes multiple property', () => {
-		$(test(), 'span').prop('testProp', false);
-		foo().hasOwnProperty('testProp').should.equal(false);
-		bar().hasOwnProperty('testProp').should.equal(false);
-	});
 });
