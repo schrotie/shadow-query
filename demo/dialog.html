@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+	<head><script type="module">
+import $ from '../shadowQuery.js';
+
+window.customElements.define('sq-dialog', class extends HTMLElement {
+	constructor() {
+		super();
+		this._$host = $(this);
+		$(this).on('attr:opened', this._onOpened.bind(this));
+	}
+	connectedCallback() {
+		if(!this.hasAttribute('deferred')) this._attachShadow();
+	}
+
+	_attachShadow() {
+		$(this).shadow(template());
+		$(this, '#container').on('click', evt => evt.stopPropagation());
+		this._$host.on('click', this.close.bind(this));
+	}
+
+	_onOpened() {
+		if(this._$host.attr('opened')) this.open();
+		else this.close();
+	}
+
+	open() {
+		if(!this.isConnected) return;
+		if(!this.shadowRoot) {
+			this._attachShadow();
+			if(this.template) {
+				$(this, ':host').append(this.template);
+				this.dispatchEvent(new CustomEvent('rendered', {bubbles: true}));
+			}
+		}
+		if(this._$host.attr('opened')) return;
+		this._$host.attr('opened', true);
+		this.dispatchEvent(new CustomEvent('open', {bubbles: true}));
+	}
+
+	close() {
+		if(!this._$host.attr('opened')) return;
+		this._$host.attr('opened', false);
+		this.dispatchEvent(new CustomEvent('close', {bubbles: true}));
+	}
+});
+
+function template() {return `
+<style>
+	:host {
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		align-items: center;
+		justify-content: center;
+		display: none;
+	}
+	:host([opened]) {
+		display: flex;
+		z-index: 4;
+	}
+
+	#container {
+		box-shadow: \
+			0 16px 24px  2px rgba(0, 0, 0, 0.14),\
+			0  6px 30px  5px rgba(0, 0, 0, 0.12),\
+			0  8px 10px -5px rgba(0, 0, 0, 0.4);
+		display: flex;
+		flex-direction: column;
+		background-color: white;
+		padding: 1em;
+		border-radius: 1em;
+		max-height: 100%;
+		overflow-y: auto;
+		margin: 1em;
+	}
+</style>
+<div id="container"><slot></slot></div>
+`;}
+
+let primaryColor     = '#4285f4';
+let z1shadow         = `0 2px 2px 0 ${alpha(14)}, 0 1px 5px 0\
+	${alpha(12)}, 0 3px 1px -2px ${alpha(2)}`;
+let z2shadow         = `0 3px 4px 0 ${alpha(14)}, 0 1px 8px 0\
+	${alpha(12)}, 0 3px 3px -2px ${alpha(2)}`;
+
+function alpha(a) {return `rgba(0, 0, 0, 0.${a})`;}
+
+const itemTemplate = `
+<style>
+	h2 {margin: 0 0 0.5em 0;}
+
+	input {
+		border: 0 none transparent;
+		border-bottom: 2px solid ${primaryColor};
+		margin-bottom: 1em;
+		font-weight: bold;
+		color: ${primaryColor};
+	}
+
+	sq-dialog > button {
+		background-color: ${primaryColor};
+		color: #fff;
+		border: 0 none transparent;
+		padding: 0.7em;
+		font-size: 1em;
+		font-weight: bold;
+		box-shadow: ${z1shadow};
+		cursor: pointer;
+	}
+	sq-dialog > button:hover {
+		box-shadow: ${z2shadow};
+	}
+	sq-dialog > button > span {
+		color: ${primaryColor};
+		background-color: #fff;
+		border-radius: 50%;
+		display: inline-flex;
+		justify-content: center;
+		align-items: center;
+		width: 1em;
+		height: 1em;
+	}
+</style>
+<h2>Configure Article</h2>
+<label>Label</label>
+<input id="label"    type="text"  ></input>
+<label>Category</label>
+<input id="category" type="text"  ></input>
+<label>Desired Stock</label>
+<input id="store"    type="number"></input>
+<label>Current Stock</label>
+<input id="stock"    type="number"></input>
+<label>Note</label>
+<input id="note"     type="text"  ></input>
+<button><span>&times;</span> Delete Article</button>
+`;
+
+
+
+let deferred = false;
+window.customElements.define('sq-item', class extends HTMLElement {
+	constructor() {super();}
+	connectedCallback() {
+		if(deferred) {
+			$(this).shadow(`<sq-dialog deferred></sq-dialog><button>Open</button>`);
+			$(this, 'sq-dialog').prop('template', itemTemplate);
+		}
+		else $(this).shadow(
+			`<sq-dialog>${itemTemplate}</sq-dialog><button>Open</button>`
+		);
+		$(this, 'button').on('click', () => $(this, 'sq-dialog')[0].open());
+	}
+});
+
+window.customElements.define('sq-list', class extends HTMLElement {
+	constructor() {super();}
+	connectedCallback() {
+		$(this).shadow();
+		$(this).append({array: new Array(100), template: '<sq-item></sq-item>'});
+	}
+});
+
+const demo = `
+<style>
+div {
+	height: 10em;
+	overflow-y: auto;
+	border: 1px solid black;
+	margin-bottom: 1em;
+}
+section + section          {opacity: 0;}
+section + section.rendered {opacity: 1;}
+</style>
+<div></div>
+<section>
+	<label>Render</label>
+	<button id="full">Full</button>
+	<button id="deferred">Deferred</button>
+</section>
+<section>
+	<label>
+		<span id="render"> </span>
+		rendering took
+		<span id="result"> </span>ms
+</section>
+`;
+window.customElements.define('dialog-demo', class extends HTMLElement {
+	constructor() {super();}
+	connectedCallback() {
+		$(this).shadow(demo);
+		$(this, '#full'    ).on('click', this._full    .bind(this));
+		$(this, '#deferred').on('click', this._deferred.bind(this));
+	}
+
+	_full(    ) {deferred = false; this._test();}
+	_deferred() {deferred = true;  this._test();}
+
+	_test() {
+		$(this, 'div').append({array: []});
+		const start = (new Date()).getTime();
+		$(this, 'div')
+		.append({array: new Array(500), template: '<sq-item></sq-item>'});
+		$(this, '#render').text(deferred ? 'Deferred' : 'Full');
+		$(this, '#result').text((new Date()).getTime() - start);
+		$(this, 'section + section').addClass('rendered');
+	}
+});
+	</script></head>
+	<body>
+		<dialog-demo></dialog-demo>
+		<style>p {max-width: 40em;}</style>
+		<p>
+			This demo shows how ShadowQuery makes new programming patterns
+			possible by getting you back behind the wheel. This is an extract
+			of a real life example.
+		</p>
+		<p>
+			The problem: I want to display a list of several items. Each item has
+			some initially hidden DOM attached, in this case a dialog. Rendering
+			all that DOM takes time, even if it's invisible. The dialog can handle
+			its own stuff, but client code must render its template and this is
+			usually the bulk of the DOM. I want as little arcane deferred
+			rendering logic in the client code as possible.
+		</p>
+		<p>
+			This demo now demonstrates a relatively simple generic dialog, that
+			works as expected, but also optionally supports deferred rendering.
+			In that case you give the dialog your client template. You can then
+			hook up the handlers on your template when you get the dialog's
+			"rendered" event (not shown in the demo).
+		</p>
+		<p>
+			That is a generic solution to a somewhat frustrating problem I have
+			faced several times now. Then I usually resorted to putting the dialog
+			at the top and having just one instance. The ShadowQuery solution is
+			much more elegant IMHO. Most importantly: it is relatively easy to
+			come up with that solution using ShadowQuery: that's because it's all
+			straightforward JavaScript. I'm sure you can do the same with several
+			other templating engines ... after taking a deep dive into how to tag
+			JavaScript template strings for example, or otherwise dive rather
+			deeply into your chosen framework.
+		</p>
+		<p>
+			And I'm pretty sure, it's simple to come up with various other
+			solutions. E.g. a floating container of which there is only one in a
+			given context and that is simply moved around as required.
+			The sky is your limit.
+		</p>
+	</body>
+</html>
