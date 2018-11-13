@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.1/redux.js'></script>
+		<script>
+///// Taken from https://redux.js.org/basics/exampletodolist /////
+// actions/index.js
+
+let nextTodoId = 0
+const addTodo = text => ({
+	type: 'ADD_TODO',
+	id: nextTodoId++,
+	text
+})
+
+const setVisibilityFilter = filter => ({
+	type: 'SET_VISIBILITY_FILTER',
+	filter
+})
+
+const toggleTodo = id => ({
+	type: 'TOGGLE_TODO',
+	id
+})
+
+const VisibilityFilters = {
+	SHOW_ALL: 'SHOW_ALL',
+	SHOW_COMPLETED: 'SHOW_COMPLETED',
+	SHOW_ACTIVE: 'SHOW_ACTIVE'
+}
+
+
+// reducers/todos.js
+
+const todos = (state = [], action) => {
+	switch (action.type) {
+		case 'ADD_TODO':
+			return [
+				...state,
+				{
+					id: action.id,
+					text: action.text,
+					completed: false
+				}
+			]
+		case 'TOGGLE_TODO': return state.map(todo =>
+			todo.id === action.id ?
+			{ ...todo, completed: !todo.completed } :
+			todo
+		)
+		default:
+			return state
+	}
+}
+
+
+// reducers/visibilityFilter.js
+
+const visibilityFilter = (state = VisibilityFilters.SHOW_ALL, action) => {
+	switch (action.type) {
+		case 'SET_VISIBILITY_FILTER': return action.filter
+		default: return state
+	}
+}
+
+
+// reducers/index.js
+const store = Redux.createStore(Redux.combineReducers({
+	todos,
+	visibilityFilter
+}))
+		</script>
+
+		<script type="module">
+import $ from '../shadowQuery.js';
+
+const sqTodoTemplate = `
+	<style>:host, :host > style ~ * {display: block;}</style>
+	<sq-todo-add></sq-todo-add>
+	<sq-todo-list></sq-todo-list>
+	<sq-todo-filter></sq-todo-filter>
+`;
+window.customElements.define('sq-todo', class extends HTMLElement {
+	constructor() {super();}
+	connectedCallback() {$(this).shadow(sqTodoTemplate);}
+});
+
+const sqTodoAddTemplate = `
+	<input></input>
+	<button>Add</button>
+`;
+window.customElements.define('sq-todo-add', class extends HTMLElement {
+	constructor() {super();}
+	connectedCallback() {
+		$(this).shadow(sqTodoAddTemplate);
+		$(this, 'input')
+		.on('keyup', evt => (evt.keyCode === 13) && this._add());
+		$(this, 'button').on('click', this._add.bind(this));
+	}
+	_add() {
+		store.dispatch(addTodo($(this, 'input').prop('value')));
+		$(this, 'input').prop('value', '');
+	}
+});
+
+const sqTodoListTemplate = `<ul></ul>`;
+const sqTodoListItemTemplate = `<li><sq-todo-item></sq-todo-item></li>`;
+window.customElements.define('sq-todo-list', class extends HTMLElement {
+	constructor() {
+		super();
+		store.subscribe(this.update.bind(this));
+	}
+	connectedCallback() {$(this).shadow(sqTodoListTemplate);}
+	update() {$(this, 'ul').append({
+		array: this._array(),
+		template: sqTodoListItemTemplate,
+		update: this._updateItem.bind(this),
+	});}
+	_array() {
+		const state = store.getState();
+		switch (state.visibilityFilter) {
+			case 'SHOW_ALL':       return state.todos;
+			case 'SHOW_COMPLETED': return state.todos.filter(t => t.completed);
+			case 'SHOW_ACTIVE':    return state.todos.filter(t => !t.completed);
+			default: throw new Error('Unknown filter: ' + filter);
+		}
+	}
+	_updateItem(node, todo) {
+		$(node[0].firstChild, ':host').prop('sqTodo', todo);
+	}
+});
+
+const sqTodoItemTemplate = `
+	<style>
+		label {cursor: pointer;}
+		label.completed {text-decoration: line-through;}
+	</style>
+	<label> </label>
+`;
+window.customElements.define('sq-todo-item', class extends HTMLElement {
+	constructor() {
+		super();
+		$(this).on('prop:sqTodo', this._update.bind(this));
+		$(this).on('click', this._click.bind(this));
+	}
+	connectedCallback() {
+		$(this).shadow(sqTodoItemTemplate);
+		this._update();
+	}
+	_update() {
+		$(this, 'label').text(this.sqTodo && this.sqTodo.text)
+		.toggleClass('completed', this.sqTodo && this.sqTodo.completed);
+	}
+	_click() {store.dispatch(toggleTodo(this.sqTodo.id));}
+});
+
+const sqTodoFilterTemplate = `
+	<label>Show:</label>
+	<button disabled id="SHOW_ALL">All</button>
+	<button id="SHOW_ACTIVE">Active</button>
+	<button id="SHOW_COMPLETED">Completed</button>
+`;
+window.customElements.define('sq-todo-filter', class extends HTMLElement {
+	constructor() {
+		super();
+		store.subscribe(this.update.bind(this));
+	}
+	connectedCallback() {
+		$(this).shadow(sqTodoFilterTemplate);
+		$(this, 'button').on('click', this._click.bind(this));
+	}
+	update() {
+		$(this, 'button').attr('disabled', false);
+		$(this, `#${store.getState().visibilityFilter}`).attr('disabled', true);
+	}
+	_click(evt) {store.dispatch(setVisibilityFilter(evt.path[0].id));}
+});
+		</script>
+	</head>
+	<body>
+		<sq-todo></sq-todo>
+		<style>p {max-width: 40em;}</style>
+		<p>
+			Please compare this to the react/redux todo list example:
+		</p>
+		<ul>
+			<li><a href="https://redux.js.org/basics/exampletodolist">Tutorial</a></li>
+			<li><a href="https://codesandbox.io/s/github/reduxjs/redux/tree/master/examples/todos">Sandbox</a></li>
+		</ul>
+		<p>
+			This demonstrates how to write a web application with Redux and ShadowQuery. This is kind of my recommended architecture for most projects. I went from the <a href="todo.html">todo demo</a> without Redux, then pasted the Redux stuff (actions, reducers) at the top and did a few tweaks to the original todo demo code. Ideally one would separate presentational and container components, but I was to lazy for this exercise here. It's quite easy, though, and recommended for real world projects.
+		</p>
+		<p>
+			Doing that separation into container and presentational would bring the Shadow Query todo demo's code size close to the React/Redux example. The <a href="todo.html">comments</a> on performance and IMHO readability still apply.
+		</p>
+	</body>
+</html>
