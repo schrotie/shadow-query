@@ -25,7 +25,8 @@ export class ShadowQuery extends Array {
 	 * Note that for the node parameter, it selects node.shadowRoot by default,
 	 * if available. If you want the node and not its shadowRoot, pass ':host'
 	 * as selector.
-	 * @param {Node|Node[]|NodeList|ShadowQuery|String} node - the initial node(s)
+	 * @param {Node|Node[]|NodeList|ShadowQuery|String} node - the initial
+	 * node(s)
 	 * @param {String=} selector - if passed will query node(s) with selector
 	 */
 	constructor(node, selector) {
@@ -448,7 +449,7 @@ function find(coll, selector) {
 }
 
 
-////////// Events //////////
+// /////// Events //////////
 
 function attrFilter(evt) {
 	return {attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]};
@@ -463,7 +464,9 @@ function onceObserver(node, callback, opt) {
 }
 
 function observer(node, noself, callback, opt, origCb = callback) {
-	const observer = new MutationObserver(noself ? noSelf(callback, true) : callback);
+	const observer = new MutationObserver(
+		noself ? noSelf(callback, true) : callback
+	);
 	observer.observe(node, opt);
 	if(!node[obsKey(opt)]) node[obsKey(opt)] = {[origCb]:observer};
 	else node[obsKey(opt)][origCb] = observer;
@@ -527,7 +530,7 @@ function noSelf(callback, async) {
 	};
 }
 
-////////// Templates //////////
+// /////// Templates //////////
 
 const templates = {};
 

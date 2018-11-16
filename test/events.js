@@ -31,7 +31,7 @@ describe('events', () => {
 	});
 
 	it('catches a recursive event listener', done => {
-		$(foo()).on('test-event', 'noSelf', () => {evt(); done()});
+		$(foo()).on('test-event', 'noSelf', () => {evt(); done();});
 		evt();
 	});
 
@@ -68,7 +68,7 @@ describe('events', () => {
 	});
 
 	it('catches a recursive attribute listener', done => {
-		$(foo()).on('attr:data-test', 'noSelf', () => {attr(); done()});
+		$(foo()).on('attr:data-test', 'noSelf', () => {attr(); done();});
 		attr();
 	});
 
@@ -104,7 +104,7 @@ describe('events', () => {
 	});
 
 	it('catches a recursive text listener', done => {
-		$(foo()).on('text:', 'noSelf', () => {text(); done()});
+		$(foo()).on('text:', 'noSelf', () => {text(); done();});
 		text();
 	});
 
@@ -155,7 +155,7 @@ describe('events', () => {
 	});
 
 	it('catches a recursive property listener', done => {
-		$(foo()).on('prop:testProp', 'noSelf', () => {prop(); done()});
+		$(foo()).on('prop:testProp', 'noSelf', () => {prop(); done();});
 		prop();
 	});
 
