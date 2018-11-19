@@ -123,7 +123,7 @@ So lets assume you did `import $ from '.../shadowQuery.mjs';`. Now `$` is a func
 jQuery works on the document, ShadowQuery is for web components which work on document-fragments. Thus the first arguments is always an entry node (or several). The second is an optional selector. If you pass the selector the result will be that of querying the entry nodes for the selector, otherwise the result is the entry node(s). Anyway, what you get is an Array (ShadowQuery extends Array!) of nodes augmented with a couple of methods to simplify your web component developer life.
 
 The whole DOM API has 5 types of methods:
-* __query___
+* __query___  
 `constructor`, `query`
 * __className__  
 `addClass`, `removeClass`, `hasClass`
@@ -240,4 +240,4 @@ npm run-script build-doc
 ```
 And then open shadow-query/documentation/index.html in your browser (without server). The API reference is included in the npm package.
 
-Also checkout the demo directory that comes with the git clone. It contains a few examples on how to use ShadowQuery. Most notably, demo/todoRedux/ contains a [tutorial](https://blog.roggendorf.pro/2018/11/19/native-web-application-tutorial/) on how to develop modern native web applications. 
+Also checkout the demo directory that comes with the git clone. It contains a few examples on how to use ShadowQuery. Most notably, demo/todoRedux/ contains a [tutorial](https://blog.roggendorf.pro/2018/11/19/native-web-application-tutorial/) on how to develop modern native web applications.
