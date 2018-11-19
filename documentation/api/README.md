@@ -26,6 +26,9 @@ ShadowQuery module.
     * [.shadowQuery(node, [selector])](#module_shadowQuery.shadowQuery) ⇒ <code>ShadowQuery</code>
     * [.template(template)](#module_shadowQuery.template) ⇒ <code>DocumentFragment</code> \| <code>dynTemplate</code>
 
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery"></a>
 
 ### shadowQuery.ShadowQuery
@@ -55,6 +58,9 @@ or do whatever you like to it.
     * [.text([t])](#module_shadowQuery.ShadowQuery+text) ⇒ <code>ShadowQuery</code> \| <code>string</code>
     * [.toggleClass(className, [state])](#module_shadowQuery.ShadowQuery+toggleClass) ⇒ <code>ShadowQuery</code>
 
+
+* * *
+
 <a name="new_module_shadowQuery.ShadowQuery_new"></a>
 
 #### new exports.ShadowQuery(node, [selector])
@@ -73,6 +79,9 @@ as selector.
 | node | <code>Node</code> \| <code>Array.&lt;Node&gt;</code> \| <code>NodeList</code> \| <code>ShadowQuery</code> \| <code>String</code> | the initial node(s) |
 | [selector] | <code>String</code> | if passed will query node(s) with selector |
 
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery+addClass"></a>
 
 #### shadowQuery.addClass(className) ⇒ <code>ShadowQuery</code>
@@ -84,6 +93,9 @@ add a CSS-class to all selected nodes; uses classList.add
 | Param | Type | Description |
 | --- | --- | --- |
 | className | <code>string</code> | the class to add |
+
+
+* * *
 
 <a name="module_shadowQuery.ShadowQuery+after"></a>
 
@@ -97,6 +109,9 @@ Insert DOM after all selected nodes
 | --- | --- | --- |
 | nodes | <code>Node</code> \| <code>Array.&lt;Node&gt;</code> \| <code>ShadowQuery</code> \| <code>String</code> \| <code>$.template</code> | DOM to insert; String will be transformed by calling $.template $.template is the result of a call to [$.template](#module_shadowQuery.template) |
 
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery+append"></a>
 
 #### shadowQuery.append(nodes) ⇒ <code>ShadowQuery</code>
@@ -108,6 +123,9 @@ Append DOM to all selected nodes
 | Param | Type | Description |
 | --- | --- | --- |
 | nodes | <code>Node</code> \| <code>Array.&lt;Node&gt;</code> \| <code>ShadowQuery</code> \| <code>String</code> \| <code>$.template</code> | DOM to insert; String will be transformed by calling $.template $.template is the result of a call to [$.template](#module_shadowQuery.template) |
+
+
+* * *
 
 <a name="module_shadowQuery.ShadowQuery+attr"></a>
 
@@ -137,6 +155,9 @@ document.registerElement('hello-world', class extends HTMLElement {
 });
 <hello-world hello="world?"></hello-world>
 ```
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery+before"></a>
 
 #### shadowQuery.before(nodes) ⇒ <code>ShadowQuery</code>
@@ -148,6 +169,9 @@ Insert DOM before all selected nodes
 | Param | Type | Description |
 | --- | --- | --- |
 | nodes | <code>Node</code> \| <code>Array.&lt;Node&gt;</code> \| <code>ShadowQuery</code> \| <code>String</code> \| <code>$.template</code> | DOM to insert; String will be transformed by calling $.template $.template is the result of a call to [$.template](#module_shadowQuery.template) |
+
+
+* * *
 
 <a name="module_shadowQuery.ShadowQuery+hasClass"></a>
 
@@ -161,6 +185,9 @@ uses classList.contains
 | Param | Type | Description |
 | --- | --- | --- |
 | className | <code>string</code> | the class to check |
+
+
+* * *
 
 <a name="module_shadowQuery.ShadowQuery+off"></a>
 
@@ -176,6 +203,9 @@ value, property- and text change events (see
 | --- | --- | --- |
 | evt | <code>String</code> | event name to pass to removeEventListener. To stop listening to attribute changes do `attr:name`, for properties `prop:name`, for text use `text:` |
 | callback | <code>function</code> | function to unregister |
+
+
+* * *
 
 <a name="module_shadowQuery.ShadowQuery+on"></a>
 
@@ -253,6 +283,9 @@ $(this, 'label').on(
 	this._onLabelTextChange.bind(this)
 );
 ```
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery+once"></a>
 
 #### shadowQuery.once(evt, callback) ⇒ <code>ShadowQuery</code>
@@ -272,6 +305,9 @@ in node.js
 | evt | <code>String</code> | event name to pass to addEventListener. To listen to attribute changes do 'attr:name'. This will create a MutationObserver for changes of the attribute called 'name'. For properties `prop:name`, for text use `text:` |
 | callback | <code>function</code> | function to call on event |
 
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery+prepend"></a>
 
 #### shadowQuery.prepend(nodes) ⇒ <code>ShadowQuery</code>
@@ -283,6 +319,9 @@ Insert DOM as first content of all selected nodes
 | Param | Type | Description |
 | --- | --- | --- |
 | nodes | <code>Node</code> \| <code>Array.&lt;Node&gt;</code> \| <code>ShadowQuery</code> \| <code>String</code> \| <code>$.template</code> | DOM to insert; String will be transformed by calling $.template getTemplate is the result of a call to this.getTemplate (see [$.template](#module_shadowQuery.template)) |
+
+
+* * *
 
 <a name="module_shadowQuery.ShadowQuery+prop"></a>
 
@@ -314,6 +353,9 @@ document.registerElement('hello-world', class extends HTMLElement {
 	}
 });
 ```
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery+query"></a>
 
 #### shadowQuery.query(selector) ⇒ <code>ShadowQuery</code>
@@ -329,6 +371,9 @@ Array.find. Thus I renamed the method to 'query.
 | --- | --- | --- |
 | selector | <code>String</code> | CSS-selector to query |
 
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery+removeClass"></a>
 
 #### shadowQuery.removeClass(className) ⇒ <code>ShadowQuery</code>
@@ -340,6 +385,9 @@ remove a CSS-class from all selected nodes; uses classList.remove
 | Param | Type | Description |
 | --- | --- | --- |
 | className | <code>string</code> | the class to remove |
+
+
+* * *
 
 <a name="module_shadowQuery.ShadowQuery+shadow"></a>
 
@@ -363,6 +411,9 @@ component's connectedCallbacks.
 ```js
 connectedCallback() {$(this).shadow('Hello world!');}
 ```
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery+text"></a>
 
 #### shadowQuery.text([t]) ⇒ <code>ShadowQuery</code> \| <code>string</code>
@@ -390,6 +441,9 @@ document.registerElement('hello-world', class extends HTMLElement {
 });
 <hello-world>Hello world?></hello-world>
 ```
+
+* * *
+
 <a name="module_shadowQuery.ShadowQuery+toggleClass"></a>
 
 #### shadowQuery.toggleClass(className, [state]) ⇒ <code>ShadowQuery</code>
@@ -403,6 +457,9 @@ toggle a CSS-class on all selected nodes; uses classList.toggle
 | className | <code>string</code> | the class to toggle |
 | [state] | <code>bool</code> | if true [addClass](#module_shadowQuery.ShadowQuery+addClass), if false [removeClass](#module_shadowQuery.ShadowQuery+removeClass) |
 
+
+* * *
+
 <a name="module_shadowQuery.shadowQuery"></a>
 
 ### shadowQuery.shadowQuery(node, [selector]) ⇒ <code>ShadowQuery</code>
@@ -415,6 +472,9 @@ Instantiate a ShadowQuery object. See [ShadowQuery](#module_shadowQuery.ShadowQu
 | --- | --- | --- |
 | node | <code>Node</code> \| <code>Array.&lt;Node&gt;</code> \| <code>NodeList</code> \| <code>ShadowQuery</code> | the initial node |
 | [selector] | <code>String</code> | if passed will query node(s) with selector |
+
+
+* * *
 
 <a name="module_shadowQuery.template"></a>
 
@@ -459,3 +519,6 @@ connectedCallback() {
 	});
 }
 ```
+
+* * *
+

@@ -47,7 +47,7 @@
 	},
 	"scripts": {
 		"build": "npm run-script build-doc; npm run-script uglify",
-		"build-doc": "cp shadowQuery.mjs s.js; ./node_modules/.bin/jsdoc2md -f s.js > documentation/api/README.md; rm s.js",
+		"build-doc": "cp shadowQuery.mjs s.js; ./node_modules/.bin/jsdoc2md --separators -f s.js > documentation/api/README.md; rm s.js",
 		"lint": "eslint . --ext js,html --ignore-path .gitignore",
 		"prepare": "npm run build",
 		"start": "${PWD}/node_modules/.bin/serve &",
