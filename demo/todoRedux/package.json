@@ -1,0 +1,27 @@
+{
+	"name": "Shadow_Query_Todo_Tutorial",
+	"license": "MIT2",
+	"version": "0.0.1",
+	"devDependencies": {
+		"@babel/cli": "^7.1.5",
+		"@babel/core": "^7.1.6",
+		"@babel/preset-env": "^7.1.6",
+		"eslint": "^3.12.0",
+		"eslint-config-google": "^0.7.1",
+		"eslint-plugin-html": "^1.7.0",
+		"rollup": "^0.67.1",
+		"shadow-query": "latest",
+		"serve": "latest",
+		"uglify-js": "^3.4.9"
+	},
+	"scripts": {
+		"build": "./build.sh",
+		"lint": "eslint . --ext js,html --ignore-path .gitignore",
+		"start": "./node_modules/.bin/serve"
+	},
+	"dependencies": {
+		"@webcomponents/webcomponentsjs": "latest",
+		"redux": "latest",
+		"showdown": "^1.9.0"
+	}
+}

@@ -1,4 +1,4 @@
-import $ from '../shadowQuery.js';
+import $ from '../shadowQuery.mjs';
 
 const dom = `\
 <span id="foo" data-test="foo">foo</span>\

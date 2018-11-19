@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head><script type="module">
-		import $ from '../shadowQuery.js';
+		import $ from '../shadowQuery.mjs';
 
 		const sqTodoTemplate = `
 			<style>:host, :host > style ~ * {display: block;}</style>
@@ -107,9 +107,9 @@
 				$(this, 'button').on('click', this._click.bind(this));
 			}
 			_click(evt) {
-				$(this, ':host').attr('data-filter', evt.path[0].id);
+				$(this, ':host').attr('data-filter', evt.composedPath()[0].id);
 				$(this, 'button').attr('disabled', false);
-				$(evt.path[0]).attr('disabled', true);
+				$(evt.composedPath()[0]).attr('disabled', true);
 			}
 		});
 	</script></head>
@@ -124,14 +124,26 @@
 			<li><a href="https://codesandbox.io/s/github/reduxjs/redux/tree/master/examples/todos">Sandbox</a></li>
 		</ul>
 		<p>
-			The React/Redux example has more than twice the code. That's actually fine. It uses Redux and you can scale that application all the way to Facebook. Seriously, I absolutely recommend you use Redux! This would possibly bring the ShadowQuery todo list another 50 lines closer to the React example, but still not close.<br/>
-			You also need a lot of structure for complex applications, and React provides that, so really: twice the code size is fine. However, the conviction that mixing template and code is much more expressive than writing imperative components does not stand up. Not at all!
+			The React/Redux example has more than twice the code. That's actually
+			fine. When you use the same great structure for this as was used for
+			the React/Redux example, you end up with pretty much the same code
+			size.
+			However, the conviction that mixing template and code is much more
+			expressive than writing imperative components does not stand up.
+			Not at all!
 		</p>
 		<p>
-			Then there's performance ... hell! Loading the React todo list through Chrome profiler (just the todo app, not the sandbox!) shows it to need well over 500ms of scripting time for start up. Seriously? ShadowQuery todo uses some 70ms. And if you look more closely, you find that most of that is Chrome built in boilerplate, the time actually spent for the ShadowQuery-todo-specific initialization is more like 5ms. Yes, really. A factor of 100.
+			Then there's performance ... native web components are a lot faster,
+			the footprint is negligible compare to using React.
 		</p>
 		<p>
-			Finally there's readability. The React approach may be debatable. Let's concede that maintainability trumps being able to directly tell how template and code interact. Still React creates a language of its own while ShadowQuery uses just vanilla JavaScript - which virtually every developer should be able to read without ever having seen ShadowQuery. That's because it's just a relatively simple and small library of a few shorthands for web component boilerplate.
+			Finally there's readability. The React approach may be debatable.
+			Let's concede that maintainability trumps being able to directly tell
+			how template and code interact. Still React creates a language of its
+			own while ShadowQuery uses just vanilla JavaScript - which virtually
+			every developer should be able to read without ever having seen
+			ShadowQuery. That's because it's just a relatively simple and small
+			library of a few shorthands for web component boilerplate.
 		</p>
 	</body>
 </html>

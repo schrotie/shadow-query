@@ -1,0 +1,8 @@
+0.0.13
+
+BREAKING renamed all *.js to *.mjs since this works better with various tools
+
+Moved demo/todoRedux.html to demo/todoRedux/. It is now a full fledged
+Redux application with separated "connector" modules ("containers" in React
+lingo), its own package.js, build process and README.md. The README.md is a
+tutorial for how to develop full fledged ShadowQuery/Redux web apps.

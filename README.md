@@ -1,11 +1,11 @@
 # shadow-query
-Nano sized utilities library for writing vanilla web components
+Micro-library for writing vanilla web components
 
-ShadowQuery is a tiny (1.9k uglified gzip, some 350 lines of code without comments and new lines as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
+ShadowQuery is a tiny (2k uglified gzip, some 350 lines of code without comments and new lines as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.
 
 __Tiny__: demo/dbmonster.html is a selfcontained HTML app _below 10K_ (load without server into your Chrome or Firefox, for other browsers you may need to add more polyfills).
 
-__High Performance__: shadow-query dbmonster ist among the fastest dbmonsters out there, one of the lowest memory footprints.
+__High Performance__: shadow-query dbmonster is among the fastest dbmonsters out there, one of the lowest memory footprints.
 
 ... _and all that at 100 lines of nicely structured code plus templates_
 
@@ -13,7 +13,7 @@ __High Performance__: shadow-query dbmonster ist among the fastest dbmonsters ou
 <!DOCTYPE html>
 <html>
 	<head><script type="module">
-		import $ from '../shadowQuery.js';
+		import $ from '../shadowQuery.mjs';
 
 		const template = `
 			<style>:host {
@@ -102,7 +102,7 @@ document.registerElement('hello-world', class extends HTMLElement {
 ```
 ## ShadowQuery
 ```js
-import $ from '../shadowQuery.js';
+import $ from '../shadowQuery.mjs';
 window.customElements.define('hello-world', class extends HTMLElement {
 	constructor() {
 		super();
@@ -119,10 +119,12 @@ The difference is that ShadowQuery takes the template, creates an HTMLTemplateEl
 
 The ShadowQuery module has two exports. The first is `ShadowQuery`. You should only use it, if you want to modify/extend shadowQuery. The other export '`shadowQuery`' is also the default export. Thus `import {shadowQuery} ...` and `import shadowQuery ...` both work. I usually do `import $ ...` for brevity's sake.
 
-So lets assume you did `import $ from '.../shadowQuery.js';`. Now `$` is a function that takes one or two arguments and returns a `new ShadowQuery`.
+So lets assume you did `import $ from '.../shadowQuery.mjs';`. Now `$` is a function that takes one or two arguments and returns a `new ShadowQuery`.
 jQuery works on the document, ShadowQuery is for web components which work on document-fragments. Thus the first arguments is always an entry node (or several). The second is an optional selector. If you pass the selector the result will be that of querying the entry nodes for the selector, otherwise the result is the entry node(s). Anyway, what you get is an Array (ShadowQuery extends Array!) of nodes augmented with a couple of methods to simplify your web component developer life.
 
-The whole DOM API has 4 types of methods:
+The whole DOM API has 5 types of methods:
+* __query___
+`constructor`, `query`
 * __className__  
 `addClass`, `removeClass`, `hasClass`
 * __node insertion__  
@@ -236,7 +238,6 @@ cd shadow-query
 npm install
 npm run-script build-doc
 ```
-And then open shadow-query/documentation/index.html in your browser (without server).
+And then open shadow-query/documentation/index.html in your browser (without server). The API reference is included in the npm package.
 
-Also checkout the demo directory that comes with the git clone. It contains a few examples on how to use ShadowQuery.
-
+Also checkout the demo directory that comes with the git clone. It contains a few examples on how to use ShadowQuery. Most notably, demo/todoRedux/ contains a [tutorial](https://blog.roggendorf.pro/2018/11/19/native-web-application-tutorial/) on how to develop modern native web applications. 

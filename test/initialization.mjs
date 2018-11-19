@@ -1,5 +1,5 @@
-import $ from '../shadowQuery.js';
-import './testComponent.js';
+import $ from '../shadowQuery.mjs';
+import './testComponent.mjs';
 
 const dom = `\
 <span id="span"></span>\

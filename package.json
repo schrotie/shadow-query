@@ -1,13 +1,13 @@
 {
 	"name": "shadow-query",
-	"version": "0.0.12",
+	"version": "0.0.13",
 	"license": "MIT",
 	"author": {
 		"name": "Thorsten Roggendorf",
 		"email": "junk@schrotie.de",
 		"url": "http://schrotie.de"
 	},
-	"description": "nano sized utilities library for writing high performance vanilla web components",
+	"description": "micro-library for writing high performance vanilla web components",
 	"homepage": "https://github.com/schrotie/shadow-query#readme",
 	"bugs": {
 		"url": "https://github.com/shrotie/shadow-query/issues",
@@ -18,16 +18,22 @@
 		"url": "https://github.com/schrotie/shadow-query"
 	},
 	"files": [
-		"shadowQuery.js",
-		"shadowQuery.min.js"
+		"documentation/**",
+		"shadowQuery.mjs",
+		"shadowQuery.min.mjs"
 	],
+	"directories": {
+		"doc": "documentation",
+		"example": "demo",
+		"test": "test"
+	},
 	"keywords": [
 		"browser",
 		"javascript",
 		"library",
 		"web-components"
 	],
-	"browser": "shadowQuery.js",
+	"browser": "shadowQuery.mjs",
 	"devDependencies": {
 		"chai": "latest",
 		"eslint": "^3.12.0",
@@ -40,12 +46,12 @@
 	},
 	"scripts": {
 		"build": "npm run-script build-doc; npm run-script uglify",
-		"build-doc": "./node_modules/.bin/jsdoc --configure jsdoc.json -d documentation shadowQuery.js README.md",
+		"build-doc": "./node_modules/.bin/jsdoc --configure jsdoc.json -d documentation shadowQuery.mjs README.md",
 		"lint": "eslint . --ext js,html --ignore-path .gitignore",
 		"prepare": "npm run build",
 		"start" : "${PWD}/node_modules/.bin/serve &",
 		"stop": "ps aux | grep 'shadow-query/node_modules/.bin/serve' | grep -v grep | awk '{print $2}' | xargs kill",
 		"test": "npm start; sleep 2; chromium-browser http://localhost:5000/test/test.html; sleep 5; npm stop",
-		"uglify": "./node_modules/uglify-es/bin/uglifyjs -c -m -- shadowQuery.js > shadowQuery.min.js; sed -i '1s;^;/* eslint-disable */\\n;' shadowQuery.min.js"
+		"uglify": "./node_modules/uglify-es/bin/uglifyjs -c -m --keep-fnames -- shadowQuery.mjs > shadowQuery.min.mjs; sed -i '1s;^;/* eslint-disable */\\n;' shadowQuery.min.mjs"
 	}
 }
