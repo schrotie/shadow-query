@@ -8,10 +8,12 @@ Play with the "Hello Framework!" demo at [codepen].
 The template of this example is a bit more complex than "Hello world!". Thus it is defined in a separate variable outside of the component. You should follow this practice in most of your components that have any significant DOM. It usually yields better readable code. JavaScript template strings, quoted by back-tics "\`" allow writing multi line strings and various editor plug-ins even do nice highlighting in these for you.
 
 ```html
-	<style>:host {
-		cursor: pointer;
-		font-family: sans-serif;
-	}</style>
+	<style>
+		:host {
+			cursor: pointer;
+			font-family: sans-serif;
+			}
+	</style>
 	<h3><slot></slot></h3>
 	<ul></ul>
 ```
@@ -57,7 +59,7 @@ window.customElements.define('hello-framework', class extends HTMLElement {
 		$(this).shadow(template);
 		this._update();
 	}
-  _update() {
+ 	_update() {
 		$(this, 'ul').append({
 			array   : $(this, ':host').attr('greet').split(' '),
 			template: '<li> </li>',
@@ -88,13 +90,13 @@ Back to the selected `<ul>`: the `append` method is called for it. `append` like
 
 Dynamic templates can insert templates based on a condition and/or - as in this case - can insert arrays of templates. Here the array comes from the "greet" attribute and the template is a simple `<li>` list item element.
 
-For every element that ShadowQuery thus creates - _or updates_! - it will call the `update` callback if you provide it. `update` is called with two arguments: first a ShadowQuery object of the rendered template content, second the element of the array to which it belongs. Actually, it passes a third element, the index, which isn't used that often, though. But replace the update method without
+For every element that ShadowQuery thus creates - _or updates_! - it will call the `update` callback if you provide it. `update` is called with two arguments: first a ShadowQuery object of the rendered template content, second the element of the array to which it belongs. Actually, it passes a third element, the index, which isn't used that often, though. But replace the update method with
 ```js
 update  : (li, item, index) => li.text(`Hello ${item}${index}!`),
 ```
 and see what happens!
 
-You may recall that I wrote above, that ShadowQuery uses `querySelectorAll` to evaluate selectors. That means, you can manipulate more than one item with one call. The same is true for these templates: a template cam be more than one node. Replace the dynamic template with:
+You may recall that I wrote above, that ShadowQuery uses `querySelectorAll` to evaluate selectors. That means, you can manipulate more than one element with one call. The same is true for these templates: a template can be more than one node. Replace the dynamic template with:
 ```js
 {
 	array   : $(this, ':host').attr('greet').split(' '),
@@ -112,15 +114,15 @@ and see what happens. You see double! That's because `li` now is not just one li
 ```
 Gone! What happened? The only thing that changed is, that I removed the space in the `<span>`. With that I removed the text-node from the DOM, ShadowQuery can't set the nodeValue of the non-existent text node and thus the text is only added to the `<li>`.
 
-The next time append is called with the dynamic template, it will update the number of nodes as required and update the existing nodes instead of re-creating everything from scratch. Let's try this, change the `$(this).append` call to
+The next time `append` is called with the dynamic template, it will update the number of nodes as required and update the existing nodes instead of re-creating everything from scratch. Let's try this, change the `$(this).append` call to
 ```js
 $(this, 'ul').append({
 	array   : ['Foo', 'Bar', 'Baz'],
-	template: '<li> </li><span></span>',
+	template: '<li> </li>',
 	update  : (li, item) => li.text(`Hello ${item}!`),
 }).append({
 	array   : ['Bar', 'Foo'],
-	template: '<li> </li><span></span>',
+	template: '<li> </li>',
 	update  : (li, item) => li.text(`Hello ${item}!`),
 });
 ```
