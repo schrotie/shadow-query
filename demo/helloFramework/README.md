@@ -12,7 +12,7 @@ The template of this example is a bit more complex than "Hello world!". Thus it 
 		:host {
 			cursor: pointer;
 			font-family: sans-serif;
-			}
+		}
 	</style>
 	<h3><slot></slot></h3>
 	<ul></ul>
