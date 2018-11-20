@@ -9,7 +9,7 @@
 * dialog.html in [this] directory demonstrates how ShadowQuery facilitates new programming patterns.
 
 [this]: https://github.com/schrotie/shadow-query/tree/master/demo
-[Hello world]: https://github.com/schrotie/shadow-query/tree/master/demo/helloFramework
+[Hello world]: https://github.com/schrotie/shadow-query/tree/master/demo/helloWorld
 [Hello Framework]: https://github.com/schrotie/shadow-query/tree/master/demo/helloFramework
 [TODO]: https://github.com/schrotie/shadow-query/tree/master/demo/todo
 [TODO Redux]: https://github.com/schrotie/shadow-query/tree/master/demo/todoRedux
