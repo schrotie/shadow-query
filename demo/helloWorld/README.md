@@ -19,9 +19,13 @@ with
 ```js
 this.innerHTML = 'Hello world!';
 ```
-The result is the same! Well, superficially it is. When you do this `attachShadow` thingy, you create shadow DOM. `attachShadow` appends a `shadowRoot` element to your element. A `shadowRoot` is a "document fragment". Whatever happens in the parent document - or parent document fragment if your element is part of another shadowRoot! - does not happen to your shadow DOM. CSS selectors don't select your stuff, code traversing the parent DOM won't come across your shadow DOM and so on. Vice versa the CSS in your shadow DOM does not leak out of your document fragment - you create your own private world inside your `shadowRoot`!
+The result is the same! Well, superficially it is. When you do this `attachShadow` thingy, you create shadow DOM. `attachShadow` appends a `shadowRoot` element to your element. A `shadowRoot` is a "document fragment".
 
-Let's try this. You removed `attachShadow` for the vanilla element above. Now replace
+Your `shadowRoot` is your own private Vegas, do whatever you like without fear of breaking other stuff in the HTML page. What happens in `shadowRoot` stays in `shadowRoot`.
+
+Vice versa whatever happens in the parent document - or parent document fragment if your element is part of another shadowRoot! - does not happen to your shadow DOM. CSS selectors don't select your stuff, code traversing the parent DOM won't come across your shadow DOM and so on. Just as the CSS in your shadow DOM does not leak out of your document fragment.
+
+Let's try this! You removed `attachShadow` for the vanilla element above. Now replace
 ```js
 this.innerHTML = 'Hello world!';
 ```
