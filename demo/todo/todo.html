@@ -4,7 +4,14 @@
 		import $ from '../shadowQuery.mjs';
 
 		const sqTodoTemplate = `
-			<style>:host, :host > style ~ * {display: block;}</style>
+			<style>
+		    :host, :host > style ~ * {display: block;}
+				sq-todo-list {
+					height: 10rem;
+					width: 15rem;
+					overflow: auto;
+				}
+		  </style>
 			<sq-todo-add></sq-todo-add>
 			<sq-todo-list></sq-todo-list>
 			<sq-todo-filter></sq-todo-filter>
@@ -15,7 +22,8 @@
 				$(this).shadow(sqTodoTemplate);
 				[this._add, this._list, this._filter] = $(this, 'style ~ *')
 				.map(el => $(el));
-				$(this, 'sq-todo-add, sq-todo-list').prop('sqTodo', []);
+				const initialTodos = [{value:'Foo'}, {value:'Bar'}, {value:'Baz'}];
+				$(this, 'sq-todo-add, sq-todo-list').prop('sqTodo', initialTodos);
 				this._add.on('add', () => $(this, 'sq-todo-list')[0].update());
 				this._filter.on('attr:data-filter', () =>
 					this._list.prop('filter', this._filter.attr('data-filter'))
@@ -23,14 +31,10 @@
 			}
 		});
 
-		const sqTodoAddTemplate = `
-			<input></input>
-			<button>Add</button>
-		`;
 		window.customElements.define('sq-todo-add', class extends HTMLElement {
 			constructor() {super();}
 			connectedCallback() {
-				$(this).shadow(sqTodoAddTemplate);
+				$(this).shadow('<input></input> <button>Add</button>');
 				$(this, 'input')
 				.on('keyup', evt => (evt.keyCode === 13) && this._add());
 				$(this, 'button').on('click', this._add.bind(this));
@@ -44,17 +48,18 @@
 			}
 		});
 
-		const sqTodoListTemplate = `<ul></ul>`;
-		const sqTodoListItemTemplate = `<li><sq-todo-item></sq-todo-item></li>`;
 		window.customElements.define('sq-todo-list', class extends HTMLElement {
 			constructor() {
 				super();
 				$(this).on('prop:filter', this.update.bind(this));
 			}
-			connectedCallback() {$(this).shadow(sqTodoListTemplate);}
+			connectedCallback() {
+		    $(this).shadow('<ul></ul>');
+		    this.update();
+		  }
 			update() {$(this, 'ul').append({
 				array: this.sqTodo.filter(this._filter.bind(this)),
-				template: sqTodoListItemTemplate,
+				template: '<li><sq-todo-item></sq-todo-item></li>',
 				update: this._updateItem.bind(this),
 			});}
 			_filter(el) {

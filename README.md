@@ -4,7 +4,7 @@ Micro-library for writing vanilla web components
 * [Introduction](https://github.com/schrotie/shadow-query/tree/master/documentation/introduction)
 * [Motivation](https://github.com/schrotie/shadow-query/tree/master/documentation/motivation)
 * [API reference](https://github.com/schrotie/shadow-query/tree/master/documentation/api)
-* [Tutorial](https://github.com/schrotie/shadow-query/tree/master/demo/todoRedux)
+* [Tutorial](https://github.com/schrotie/shadow-query/tree/master/demo)
 
 
 ShadowQuery is a tiny (2k uglified gzip, some 350 lines of code without comments and new lines as of this writing) utility library to help develop high performance vanilla web components. Some of its API syntax is reminiscent of web dev warhorse jQuery, adapted for working with Shadow DOM, hence the name.

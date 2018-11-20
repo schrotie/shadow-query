@@ -1,26 +1,23 @@
 # Hello world!
 
 ## Vanilla Web Component
+
 ```js
-document.registerElement('hello-world', class extends HTMLElement {
+window.customElements.define('vanilla-hello-world', class extends HTMLElement {
 	constructor() {
-		super();
-	}
-	connectedCallback() {
-		that.attachShadow({mode: open}).innerHTML = 'Hello world!';
+   	super();
+		this.attachShadow({mode: 'open'}).innerHTML = 'Hello world!';
 	}
 });
 ```
 ## ShadowQuery
 ```js
 import $ from '../shadowQuery.mjs';
-window.customElements.define('hello-world', class extends HTMLElement {
+window.customElements.define('sq-hello-world', class extends HTMLElement {
 	constructor() {
-		super();
-	}
-	connectedCallback() {
-		$(this).shadow('Hello world!');
-	}
+   	super();
+ 		$(this).shadow('Hello world!');
+  }
 });
 ```
 
