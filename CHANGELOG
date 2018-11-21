@@ -1,3 +1,6 @@
+0.0.15
+Completed all tutorials and documentation
+
 0.0.13
 
 BREAKING renamed all *.js to *.mjs since this works better with various tools

@@ -81,18 +81,18 @@ Which brings us to `<sq-todo-item>`. We have already covered most of what it doe
 $(this, 'label').text(this.todo && this.todo.value)
 .toggleClass('done', this.todo && this.todo.done);
 ```
-When the elements `todo` property changes, the string of the label will be updated and the label's "done" class will be toggled depending on the TODO item's status. This uses chaining of calls, which is supported by all of ShadowQuery's methods - they return this, so that you can call several methods on one query.
+When the element's `todo` property changes, the string of the label will be updated and the label's "done" class will be toggled depending on the TODO item's status. This uses chaining of calls, which is supported by all of ShadowQuery's methods - they return this, so that you can call several methods on one query.
 
-Last not least we covor the `<sq-todo-filter>` component. Again the code should at this point hold no surprises for you. Just one note: the first line of its "click" handler sets its "data-filter" attribute with
+Last not least we cover the `<sq-todo-filter>` component. Again the code should at this point hold no surprises for you. Just one note: the first line of its "click" handler sets its "data-filter" attribute with
 ```js
 $(this, ':host').attr('data-filter', evt.composedPath()[0].id);
 ```
-This is the other side of the attribute data binding we discussed for `<sq-todo>`. Also on this occasion please recall the discussion of the ":host" selector in the previous tutorial. Here is a good spot to test that. You can remove the selector and observe the application sopping to work :-)
+This is the other side of the attribute data binding we discussed for `<sq-todo>`. Also on this occasion please recall the discussion of the ":host" selector in the previous tutorial. Here is a good spot to test that. You can remove the selector and observe the application stopping to work :-)
 
 That's it! Our first application is done. Now I spent quite some time explaining to you that the app architecture is terrible. Still all of ShadowQuery's features that make this easy to wire up this way are very useful in many situations. And [next] we'll explore how to morph our TODO list into a great architecture!
 
 [codepen]: https://codepen.io/schrotie/pen/jQaeby
-[Previous]: https://github.com/schrotie/shadow-query/tree/master/demo/helloWorld
-[here]: https://github.com/schrotie/shadow-query/tree/master/demo/helloFramework
+[Previous]: https://github.com/schrotie/shadow-query/tree/master/demo/helloFramework
+[here]: https://github.com/schrotie/shadow-query/tree/master/demo/todo
 [Content]: https://github.com/schrotie/shadow-query/tree/master/demo
-[Next]: https://github.com/schrotie/shadow-query/tree/master/demo/todo
+[Next]: https://github.com/schrotie/shadow-query/tree/master/demo/todoRedux
