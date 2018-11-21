@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+	<head>
+		<script type="module">
+import {ShadowQuery} from '../../shadowQuery.mjs';
+
+
+class MyShadowQuery extends ShadowQuery {
+	constructor(...arg) {super(...arg);}
+
+	bind(from, target, to, twoWay) {
+		const   toSplit =   to.split(':');
+		const fromSplit = from.split(':');
+		if((toSplit.length !== 2) || (fromSplit.length !== 2)) {
+			throw new Error('Invalid call to ShadowQuery.bind', from, to);
+		}
+		for(let node of this) for(let tgt of toNodes(target)) {
+			$(node).on(from, 'noSelf', bind($(node), $(tgt), fromSplit, toSplit));
+			if(twoWay === 'twoWay') {
+				$(tgt).on(to, 'noSelf', bind($(tgt), $(node), toSplit, fromSplit));
+			}
+		}
+	}
+
+	css(prop, value) {
+		if((arguments.length === 1) && (typeof(prop) === 'string')) {
+			return this[0] && this[0].style[prop];
+		}
+		else if((arguments.length === 2) && (typeof(prop) === 'string') &&
+			(typeof(value) === 'string')
+		) for(let node of this) node.style[prop] = value;
+		else if((arguments.length === 1) && (typeof(prop === 'object'))) {
+			for(let node of this) for(let key of Object.keys(prop)) {
+				node.style[key] = prop[key];
+			}
+		}
+		else throw new Error('Invalid call to ShadowQuery.css', ...arguments);
+		return this;
+	}
+}
+
+function toNodes(nodes, callback) {
+	if(nodes instanceof Node) return [nodes];
+	if(!(nodes instanceof Array)) nodes = new ShadowQuery(nodes);
+	return nodes;
+}
+
+function bind(source, target, from, to) {return function() {
+	if((to[0] === 'text') || (from[0] === 'text')) {
+		if((to[0] === 'text') && (from[0] === 'text')) target.text(source.text());
+		else if((to[0] === 'text')) target.text(source[from[0]](from[1]));
+		else target[to[0]](to[1], source.text());
+	}
+	else target[to[0]](to[1], source[from[0]](from[1]));
+};}
+
+function $(...arg) {return new MyShadowQuery(...arg);}
+
+const template = `
+<style>
+	label {
+		display: inline-block;
+		width: 9rem;
+	}
+</style>
+<div id="a">a</div>
+<div id="b">b</div>
+<div><label>this.a.css('color')    </label> &rarr; <span id="cssA">  </span></div>
+<div><label>this.a.attr('data-foo')</label> &rarr; <span id="attrA"> </span></div>
+<div><label>this.b.prop('foo')     </label> &rarr; <span id="propB"> </span></div>
+`;
+window.customElements.define('sq-extend', class extends HTMLElement {
+	constructor() {
+		super();
+		$(this).shadow(template);
+		[this.a, this.b] = $(this, '#a, #b').map(el => $(el));
+		this.a.css('color', 'yellow');
+		$(this, '#cssA').text(this.a.css('color'));
+		this.a.css({
+			background: 'red',
+			borderRadius: '50%',
+			display: 'inline-block',
+			fontWeight: 'bold',
+			padding: '0 5px',
+		});
+
+		this.a.bind('attr:data-foo', $(this, '#attrA'), 'text:');
+		this.b.bind('prop:foo',      $(this, '#propB'), 'text:');
+
+		this.a.attr('data-foo', 'foo');
+		this.b.prop('foo',      'baz');
+		this.a.bind('attr:data-foo', this.b, 'prop:foo', 'twoWay');
+		setTimeout(() => this.a[0].setAttribute('data-foo', 'bar'), 1000);
+		setTimeout(() => this.b[0].foo =                    'foo',  2000);
+	}
+});
+		</script>
+	</head>
+	<body><sq-extend></sq-extend></body>
+</html>
