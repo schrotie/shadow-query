@@ -1,122 +1,118 @@
 <!DOCTYPE html>
 <html>
 	<head><script type="module">
-		import $ from '../shadowQuery.mjs';
+import $ from 'https://cdn.jsdelivr.net/gh/schrotie/shadow-query/shadowQuery.mjs';
 
-		const sqTodoTemplate = `
-			<style>
-		    :host, :host > style ~ * {display: block;}
-				sq-todo-list {
-					height: 10rem;
-					width: 15rem;
-					overflow: auto;
-				}
-		  </style>
-			<sq-todo-add></sq-todo-add>
-			<sq-todo-list></sq-todo-list>
-			<sq-todo-filter></sq-todo-filter>
-		`;
-		window.customElements.define('sq-todo', class extends HTMLElement {
-			constructor() {super();}
-			connectedCallback() {
-				$(this).shadow(sqTodoTemplate);
-				[this._add, this._list, this._filter] = $(this, 'style ~ *')
-				.map(el => $(el));
-				const initialTodos = [{value:'Foo'}, {value:'Bar'}, {value:'Baz'}];
-				$(this, 'sq-todo-add, sq-todo-list').prop('sqTodo', initialTodos);
-				this._add.on('add', () => $(this, 'sq-todo-list')[0].update());
-				this._filter.on('attr:data-filter', () =>
-					this._list.prop('filter', this._filter.attr('data-filter'))
-				);
-			}
-		});
+const todoTemplate = `
+	<style>
+    :host, :host > style ~ * {display: block;}
+		sq-todo-list {
+			height: 10rem;
+			width: 15rem;
+			overflow: auto;
+		}
+  </style>
+	<sq-todo-add></sq-todo-add>
+	<sq-todo-list></sq-todo-list>
+	<sq-todo-filter></sq-todo-filter>
+`;
+window.customElements.define('sq-todo', class extends HTMLElement {
+	constructor() {
+    super();
+		$(this).shadow(todoTemplate);
+		[this._add, this._list, this._filter] = $(this, 'style ~ *')
+		.map(el => $(el));
+		const initialTodos = [{value:'Foo'}, {value:'Bar'}, {value:'Baz'}];
+		$(this, 'sq-todo-add, sq-todo-list').prop('todo', initialTodos);
+		this._add.on('add', () => $(this, 'sq-todo-list')[0].update());
+		this._filter.on('attr:data-filter', () =>
+			this._list.prop('filter', this._filter.attr('data-filter'))
+		);
+	}
+});
 
-		window.customElements.define('sq-todo-add', class extends HTMLElement {
-			constructor() {super();}
-			connectedCallback() {
-				$(this).shadow('<input></input> <button>Add</button>');
-				$(this, 'input')
-				.on('keyup', evt => (evt.keyCode === 13) && this._add());
-				$(this, 'button').on('click', this._add.bind(this));
-			}
-			_add() {
-				const value = $(this, 'input').prop('value');
-				if(!value || (this.sqTodo.indexOf(value) !== -1)) return;
-				this.sqTodo.push({value});
-				this.dispatchEvent(new CustomEvent('add', {bubbles: true}));
-				$(this, 'input').prop('value', '');
-			}
-		});
+window.customElements.define('sq-todo-add', class extends HTMLElement {
+	constructor() {
+    super();
+		$(this).shadow('<input></input> <button>Add</button>');
+		$(this, 'input')
+		.on('keyup', evt => (evt.keyCode === 13) && this._add());
+		$(this, 'button').on('click', this._add.bind(this));
+	}
+	_add() {
+		const value = $(this, 'input').prop('value');
+		if(!value || (this.todo.indexOf(value) !== -1)) return;
+		this.todo.push({value});
+		this.dispatchEvent(new CustomEvent('add', {bubbles: true}));
+		$(this, 'input').prop('value', '');
+	}
+});
 
-		window.customElements.define('sq-todo-list', class extends HTMLElement {
-			constructor() {
-				super();
-				$(this).on('prop:filter', this.update.bind(this));
-			}
-			connectedCallback() {
-		    $(this).shadow('<ul></ul>');
-		    this.update();
-		  }
-			update() {$(this, 'ul').append({
-				array: this.sqTodo.filter(this._filter.bind(this)),
-				template: '<li><sq-todo-item></sq-todo-item></li>',
-				update: this._updateItem.bind(this),
-			});}
-			_filter(el) {
-				return !this.filter || (this.filter === 'all') ||
-				((this.filter === 'active'   ) && !el.done) ||
-				((this.filter === 'completed') && el.done);
-			}
-			_updateItem(node, todo) {
-				$(node[0].firstChild, ':host').prop('sqTodo', todo);
-			}
-		});
+window.customElements.define('sq-todo-list', class extends HTMLElement {
+	constructor() {
+		super();
+		$(this).on('prop:filter', this.update.bind(this));
+    $(this).shadow('<ul></ul>');
+    this.update();
+  }
+	update() {$(this, 'ul').append({
+		array: this.todo.filter(this._filter.bind(this)),
+		template: '<li><sq-todo-item></sq-todo-item></li>',
+		update: this._updateItem.bind(this),
+	});}
+	_filter(el) {
+		return !this.filter || (this.filter === 'all') ||
+		((this.filter === 'active'   ) && !el.done) ||
+		((this.filter === 'completed') && el.done);
+	}
+	_updateItem(node, todo) {
+		$(node[0].firstChild, ':host').prop('todo', todo);
+	}
+});
 
-		const sqTodoItemTemplate = `
-			<style>
-				label {cursor: pointer;}
-				label.done {text-decoration: line-through;}
-			</style>
-			<label> </label>
-		`;
-		window.customElements.define('sq-todo-item', class extends HTMLElement {
-			constructor() {
-				super();
-				$(this).on('prop:sqTodo', this._update.bind(this));
-				$(this).on('click', this._click.bind(this));
-			}
-			connectedCallback() {
-				$(this).shadow(sqTodoItemTemplate);
-				this._update();
-			}
-			_update() {
-				$(this, 'label').text(this.sqTodo && this.sqTodo.value)
-				.toggleClass('done', this.sqTodo && this.sqTodo.done);
-			}
-			_click() {
-				this.sqTodo.done = !this.sqTodo.done;
-				this._update();
-			}
-		});
+const todoItemTemplate = `
+	<style>
+		label {cursor: pointer;}
+		label.done {text-decoration: line-through;}
+	</style>
+	<label> </label>
+`;
+window.customElements.define('sq-todo-item', class extends HTMLElement {
+	constructor() {
+		super();
+		$(this).on('prop:todo', this._update.bind(this));
+		$(this).on('click', this._click.bind(this));
+		$(this).shadow(todoItemTemplate);
+		this._update();
+	}
+	_update() {
+		$(this, 'label').text(this.todo && this.todo.value)
+		.toggleClass('done', this.todo && this.todo.done);
+	}
+	_click() {
+		this.todo.done = !this.todo.done;
+		this._update();
+	}
+});
 
-		const sqTodoFilterTemplate = `
-			<label>Show:</label>
-			<button disabled id="all">All</button>
-			<button id="active">Active</button>
-			<button id="completed">Completed</button>
-		`;
-		window.customElements.define('sq-todo-filter', class extends HTMLElement {
-			constructor() {super();}
-			connectedCallback() {
-				$(this).shadow(sqTodoFilterTemplate);
-				$(this, 'button').on('click', this._click.bind(this));
-			}
-			_click(evt) {
-				$(this, ':host').attr('data-filter', evt.composedPath()[0].id);
-				$(this, 'button').attr('disabled', false);
-				$(evt.composedPath()[0]).attr('disabled', true);
-			}
-		});
+const todoFilterTemplate = `
+	<label>Show:</label>
+	<button disabled id="all">All</button>
+	<button id="active">Active</button>
+	<button id="completed">Completed</button>
+`;
+window.customElements.define('sq-todo-filter', class extends HTMLElement {
+	constructor() {
+    super();
+		$(this).shadow(todoFilterTemplate);
+		$(this, 'button').on('click', this._click.bind(this));
+	}
+	_click(evt) {
+		$(this, ':host').attr('data-filter', evt.composedPath()[0].id);
+		$(this, 'button').attr('disabled', false);
+		$(evt.composedPath()[0]).attr('disabled', true);
+	}
+});
 	</script></head>
 	<body>
 		<sq-todo></sq-todo>
