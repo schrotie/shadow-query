@@ -66,6 +66,7 @@ const template = `
 <div id="a">a</div>
 <div id="b">b</div>
 <div><label>this.a.css('color')    </label> &rarr; <span id="cssA">  </span></div>
+<br/>
 <div><label>this.a.attr('data-foo')</label> &rarr; <span id="attrA"> </span></div>
 <div><label>this.b.prop('foo')     </label> &rarr; <span id="propB"> </span></div>
 `;
@@ -75,6 +76,7 @@ window.customElements.define('sq-extend', class extends HTMLElement {
 		$(this).shadow(template);
 		[this.a, this.b] = $(this, '#a, #b').map(el => $(el));
 		this.a.css('color', 'yellow');
+
 		$(this, '#cssA').text(this.a.css('color'));
 		this.a.css({
 			background: 'red',
