@@ -4,13 +4,13 @@
 
 So ShadowQuery ain't kicking it for you? Well, it ain't no old dog, let's teach it some new tricks!
 
-Play with the "TODO list" demo at [codepen].
+Play with the "Extending ShadowQuery" demo at [codepen].
 
 I have a problem. And you must suffer for it :-( The voices tell me to order the methods in the class alphabetically. Yet, starting with the alphabetically simpler second method didactically makes more sense. And I'm getting ahead of myself. Ugh, gosh!
 
 First things first: if you want to extend ShadowQuery ... the ECMA Script language has a keyword "extends", so this is really straightforward: import the ShadowQuery class and extend it. Now for the second method in the demo. Cough.
 
-jQuery had this really handy `css` method that allowed you to get computed CSS and set one or more style properties. This is not in original ShadowQuery because you _should_ usually not set inline style. Instead declare all required styles in you component style and switch classes. Now, if you need an animation, just add transition or animation to your style. Don't animate inline style with JavaScript!
+jQuery had this really handy `css` method that allowed you to get computed CSS and set one or more style properties. This is not in original ShadowQuery because you _should_ usually not set inline style. Instead declare all required styles in your component style and switch classes. Now, if you need an animation, just add transition or animation to your style. Don't animate inline style with JavaScript!
 
 However, there are cases where setting inline style makes sense, mostly having to do with absolute positioning. And anyway, who am I to tell you what to do and don't? So lets add that funky `css` method.
 
@@ -28,7 +28,7 @@ Next it makes the three different calls of `css` discussed above, the result bei
 ```
 , mess with `this.ab.css` and open a bug report for ShadowQuery if it does not work as expected.
 
-On to the first method of the ShadowQuery extension, `bind`: again this is something that looks real cool, nifty, useful, but that the grumpy party pooper author of ShadowQuery (yeah, me) considers too dangerous for you. 'Cause it encourages bad practice, blah, blah, blah. Fuck me, gimme that cool shit!
+On to the first method of the ShadowQuery extension, `bind`: again this is something that looks real cool, nifty, useful, but that the grumpy old party pooper author of ShadowQuery (yeah, me) considers it too dangerous for you. 'Cause it encourages bad practice, blah, blah, blah. Fuck me, gimme that cool shit!
 
 By the way, here is what it does: if you did the [todo] tutorial you know that that simple app uses several bindings between properties, attributes and text to wire up the app from a couple of components. `bind` makes that even easier. Actually most modern frameworks support `bind` one way or another. But you are certainly aware that such frameworks are incarnations of pure evil that only want to spoil you and your code. Rrright.
 
@@ -50,6 +50,7 @@ On to the actual test code. After the `css` stuff the component uses the new bin
 2. creates a two-way binding
 3. with a second delay sets the attribute so you see the first binding direction
 4. with another second delay sets the property so you see the reverse binding.
+
 For value settings it doesn't use ShadowQuery for once, to make sure this works no matter how. Play around, test if works _with_ ShadowQuery value accessors, several nodes, one-way ...
 
 That's it! I hope you enjoyed the ShadowQuery tutorials and that ShadowQuery helps you one way or another! Peace, Thorsten
