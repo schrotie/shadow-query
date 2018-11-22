@@ -14,7 +14,8 @@ $(this, 'a').forEach(a => a.style.textDecoration = 'none');
 // or:
 $(this, '#myLink')[0].style.textDecoration = 'none';
 ```
-is still simple, and if you want, it's easy to `import {ShadowQuery} from '...'` and manipulate the prototype to support
+is still simple, and if you want, it's easy to `import {ShadowQuery} from '...'` and extend it to support
 ```js
 $(this, 'a').css({textDecoration:'none'});
 ```
+Indeed the [extending](https://github.com/schrotie/shadow-query/tree/master/demo/extend) ShadowQuery tutorial features this exact example.
