@@ -15,13 +15,37 @@
 mocha.setup('bdd');
 chai.should();
 
-fetch('/test').then(res => res.text()).then(text => {
-	Promise.all(text.match(/(\w+)\.mjs/g).map(file => import(`./${file}`)))
-	.then(() => {
-		mocha.checkLeaks();
-		mocha.run();
-	});
+describeCoverageTest();
+((window.puppeteerStartCoverage && puppeteerStartCoverage()) || Promise.resolve())
+.then(listTests)
+.then(importTests)
+.then(() => {
+	mocha.checkLeaks();
+	mocha.run();
 });
+
+function listTests() {return fetch('/test').then(res => res.text());}
+
+function importTests(text) {return Promise.all(
+	text.match(/(\w+)\.mjs/g).map(file => import(`./${file}`))
+);}
+
+function describeCoverageTest() {
+	if(!window.puppeteerStartCoverage) return;
+	after(done => {
+		puppeteerStopCoverage()
+		.then(coverage => {
+			const sq = /shadowQuery\.mjs/;
+			coverage = coverage.js.filter(el => sq.test(el.url))[0];
+			let totalBytes = coverage.text.length, usedBytes = 0;
+			for(let range of coverage.ranges) usedBytes += range.end - range.start - 1;
+			coverage = usedBytes / totalBytes;
+			try{coverage.should.be.above(0.99);}
+			catch(e) {done(); throw new Error(`Insufficient coverage: ${coverage}`);}
+			done();
+		});
+	});
+}
 
 	</script>
 </body>

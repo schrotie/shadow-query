@@ -12,6 +12,8 @@ I won't cover web components in any depth. If you are not familiar with their co
 
 All discussed source code can be found in the [ShadowQuery repository]. There is quite some background to the structure of the source code. Please consult the discussion of app architecture in [part two] of this article series.
 
+I created a ShadowQuery [project template](https://github.com/schrotie/shadow-query-project) to get you started right away and let you discover your specific toolchain needs as you go.
+
 # Implementing components
 
 ## Implementing Presentational Components
@@ -367,6 +369,8 @@ That's it! The resulting `index.html` is a miniscule but cutting edge web applic
 
 I hope from this application template you are able to start your own native web application and help change web development for the better: for something that _all_ web developers can follow without training on some god framework first, for a web of truly portable components and unit-testable, profilable and great performing native apps.
 
+If you want to get started with your own project right away, consider using my ShadowQuery [project template]. This lets you start right away. You can then swap out parts as you discover your specific needs as you go.
+
 If you have any questions or suggestions, please leave a comment under [the original article].
 
 [ShadowQuery]: https://github.com/schrotie/shadow-query
@@ -378,4 +382,5 @@ If you have any questions or suggestions, please leave a comment under [the orig
 [todo app tutorial]: https://redux.js.org/basics
 [Google's guide]: https://developers.google.com/web/fundamentals/web-components/customelements
 [ShadowQuery repository]: https://github.com/schrotie/shadow-query/tree/master/demo/todoRedux
+[project template]: https://github.com/schrotie/shadow-query-project
 [the original article]: https://blog.roggendorf.pro/2018/11/19/native-web-application-tutorial/
