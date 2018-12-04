@@ -30,6 +30,7 @@ export class ShadowQuery extends Array {
 	 * @param {String=} selector - if passed will query node(s) with selector
 	 */
 	constructor(node, selector) {
+		if(node === 0) return super(0);
 		let array;
 		if(Array.isArray(node)) array = node;
 		else if(typeof(node) === 'string') array = [shadowQuery.template(node)];
@@ -442,7 +443,15 @@ function toNodes(parent, nodes, callback) {
 function find(coll, selector) {
 	const nodes = [];
 	for(let i = 0; i < coll.length; i++) {
-		if(/^\s*:host\s*/.test(selector)) nodes.push(coll[i].host || coll[i]);
+		if(/:host/.test(selector)) for(let sel of selector.split(',')) {
+			if(/^\s*:host\s*/.test(sel)) {
+				sel = sel.replace(/^\s*:host\s*/, '');
+				const host = coll[i].host || coll[i];
+				if(/[^\s]/.test(sel)) nodes.push(...host.querySelectorAll(sel));
+				else nodes.push(host);
+			}
+			else nodes.push(...coll[i].querySelectorAll(sel));
+		}
 		else nodes.push(...coll[i].querySelectorAll(selector));
 	}
 	return nodes;
