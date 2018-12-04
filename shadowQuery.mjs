@@ -30,14 +30,13 @@ export class ShadowQuery extends Array {
 	 * @param {String=} selector - if passed will query node(s) with selector
 	 */
 	constructor(node, selector) {
-		if(node === 0) return super(0);
+		if(node === 0) return super(0); // eslint-disable-line constructor-super
 		let array;
 		if(Array.isArray(node)) array = node;
 		else if(typeof(node) === 'string') array = [shadowQuery.template(node)];
 		else if(node instanceof ShadowQuery) array = node;
 		else if(node instanceof NodeList || node instanceof HTMLCollection) {
-			array = [];
-			for(var i = 0; i < node.length; i++) array.push(node[i]);
+			array = Array.from(node);
 		}
 		else array = [node.shadowRoot || node];
 
