@@ -1,18 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Mocha Tests</title>
-  <link href="https://unpkg.com/mocha@5.2.0/mocha.css" rel="stylesheet" />
+	<meta charset="utf-8">
+	<title>Test</title>
+	<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+	<script src="../node_modules/mocha/mocha.js"></script>
+	<script src="../node_modules/chai/chai.js"></script>
 </head>
 <body>
-  <div id="mocha"></div>
-  <div id="test"></div>
+	<div id="mocha"></div>
+	<div id="test"></div>
+	<script type="module">
 
-  <script src="https://unpkg.com/chai/chai.js"></script>
-  <script src="https://unpkg.com/mocha@5.2.0/mocha.js"></script>
+mocha.setup('bdd');
+chai.should();
 
-  <script>mocha.setup('bdd');</script>
-  <script type="module" src="main.mjs"></script>
+describeCoverageTest();
+((window.puppeteerStartCoverage && puppeteerStartCoverage()) || Promise.resolve())
+.then(listTests)
+.then(importTests)
+.then(() => {
+	mocha.checkLeaks();
+	mocha.run();
+});
+
+function listTests() {return fetch('/test').then(res => res.text());}
+
+function importTests(text) {return Promise.all(
+	text.match(/(\w+)\.mjs/g).map(file => import(`./${file}`))
+);}
+
+function describeCoverageTest() {
+	if(!window.puppeteerStartCoverage) return;
+	after(done => {
+		puppeteerStopCoverage()
+		.then(coverage => {
+			const sq = /shadowQuery\.mjs/;
+			coverage = coverage.js.filter(el => sq.test(el.url))[0];
+			let totalBytes = coverage.text.length, usedBytes = 0;
+			for(let range of coverage.ranges) usedBytes += range.end - range.start - 1;
+			coverage = usedBytes / totalBytes;
+			try{coverage.should.be.above(0.99);}
+			catch(e) {done(); throw new Error(`Insufficient coverage: ${coverage}`);}
+			done();
+		});
+	});
+}
+
+	</script>
 </body>
 </html>

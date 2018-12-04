@@ -6,7 +6,8 @@ import {ShadowQuery} from '../../shadowQuery.mjs';
 
 
 class MyShadowQuery extends ShadowQuery {
-	constructor(...arg) {super(...arg);}
+	// Default constructor can be ommitted!
+	// constructor(...arg) {super(...arg);}
 
 	bind(from, target, to, twoWay) {
 		const   toSplit =   to.split(':');
@@ -20,11 +21,12 @@ class MyShadowQuery extends ShadowQuery {
 				$(tgt).on(to, 'noSelf', bind($(tgt), $(node), toSplit, fromSplit));
 			}
 		}
+		return this;
 	}
 
 	css(prop, value) {
 		if((arguments.length === 1) && (typeof(prop) === 'string')) {
-			return this[0] && this[0].style[prop];
+			return this[0] && getComputedStyle(this[0])[prop];
 		}
 		else if((arguments.length === 2) && (typeof(prop) === 'string') &&
 			(typeof(value) === 'string')
@@ -58,9 +60,10 @@ function $(...arg) {return new MyShadowQuery(...arg);}
 
 const template = `
 <style>
+	#a, #b {padding: 0 5px;}
 	label {
 		display: inline-block;
-		width: 9rem;
+		width: 11rem;
 	}
 </style>
 <div id="a">a</div>
@@ -83,7 +86,6 @@ window.customElements.define('sq-extend', class extends HTMLElement {
 			borderRadius: '50%',
 			display: 'inline-block',
 			fontWeight: 'bold',
-			padding: '0 5px',
 		});
 
 		this.a.bind('attr:data-foo', $(this, '#attrA'), 'text:');

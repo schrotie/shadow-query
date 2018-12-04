@@ -1,6 +1,6 @@
 {
 	"name": "shadow-query",
-	"version": "0.0.15",
+	"version": "0.0.17",
 	"license": "MIT",
 	"author": {
 		"name": "Thorsten Roggendorf",
@@ -42,6 +42,7 @@
 		"jsdoc": "latest",
 		"jsdoc-to-markdown": "^4.0.1",
 		"mocha": "latest",
+		"mocha-headless-chrome": "latest",
 		"serve": "latest",
 		"uglify-es": "latest"
 	},
@@ -52,7 +53,7 @@
 		"prepare": "npm run build",
 		"start": "${PWD}/node_modules/.bin/serve &",
 		"stop": "ps aux | grep 'shadow-query/node_modules/.bin/serve' | grep -v grep | awk '{print $2}' | xargs kill",
-		"test": "npm start; sleep 2; chromium-browser http://localhost:5000/test/test.html; sleep 5; npm stop",
+		"test": "npm start; sleep 2; ./node_modules/.bin/mocha-headless-chrome -f http://localhost:5000/test/test.html; sleep 5; npm stop",
 		"uglify": "./node_modules/uglify-es/bin/uglifyjs -c -m --keep-fnames -- shadowQuery.mjs > shadowQuery.min.mjs; sed -i '1s;^;/* eslint-disable */\\n;' shadowQuery.min.mjs"
 	}
 }
