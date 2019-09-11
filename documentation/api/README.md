@@ -19,6 +19,7 @@ ShadowQuery module.
         * [.prepend(nodes)](#module_shadowQuery.ShadowQuery+prepend) ⇒ <code>ShadowQuery</code>
         * [.prop(name, [value])](#module_shadowQuery.ShadowQuery+prop) ⇒ <code>ShadowQuery</code> \| <code>any</code>
         * [.query(selector)](#module_shadowQuery.ShadowQuery+query) ⇒ <code>ShadowQuery</code>
+        * [.remove()](#module_shadowQuery.ShadowQuery+remove) ⇒ <code>ShadowQuery</code>
         * [.removeClass(className)](#module_shadowQuery.ShadowQuery+removeClass) ⇒ <code>ShadowQuery</code>
         * [.shadow([template], [options])](#module_shadowQuery.ShadowQuery+shadow) ⇒ <code>ShadowQuery</code>
         * [.text([t])](#module_shadowQuery.ShadowQuery+text) ⇒ <code>ShadowQuery</code> \| <code>string</code>
@@ -53,6 +54,7 @@ or do whatever you like to it.
     * [.prepend(nodes)](#module_shadowQuery.ShadowQuery+prepend) ⇒ <code>ShadowQuery</code>
     * [.prop(name, [value])](#module_shadowQuery.ShadowQuery+prop) ⇒ <code>ShadowQuery</code> \| <code>any</code>
     * [.query(selector)](#module_shadowQuery.ShadowQuery+query) ⇒ <code>ShadowQuery</code>
+    * [.remove()](#module_shadowQuery.ShadowQuery+remove) ⇒ <code>ShadowQuery</code>
     * [.removeClass(className)](#module_shadowQuery.ShadowQuery+removeClass) ⇒ <code>ShadowQuery</code>
     * [.shadow([template], [options])](#module_shadowQuery.ShadowQuery+shadow) ⇒ <code>ShadowQuery</code>
     * [.text([t])](#module_shadowQuery.ShadowQuery+text) ⇒ <code>ShadowQuery</code> \| <code>string</code>
@@ -371,6 +373,15 @@ Array.find. Thus I renamed the method to 'query.
 | --- | --- | --- |
 | selector | <code>String</code> | CSS-selector to query |
 
+
+* * *
+
+<a name="module_shadowQuery.ShadowQuery+remove"></a>
+
+#### shadowQuery.remove() ⇒ <code>ShadowQuery</code>
+Removes matched elements from DOM
+
+**Kind**: instance method of [<code>ShadowQuery</code>](#module_shadowQuery.ShadowQuery)  
 
 * * *
 
