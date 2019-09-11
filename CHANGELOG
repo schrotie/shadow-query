@@ -1,3 +1,12 @@
+0.0.19
+Several bugfixes and improvements:
+* "after" and "before" methods fixed
+* added "remove" method
+* "text" method now works without pre-existing text-node (but issues warning)
+* templates can now be HTMLTemplateElements (previously: just strings supported)
+* added code to support "prop:value" and "prop:checked" events on inputs
+* some bugfixes
+
 0.0.18
 support standard array constructor; support selectors for :host descendants
 

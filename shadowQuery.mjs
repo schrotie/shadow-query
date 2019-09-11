@@ -63,11 +63,12 @@ export class ShadowQuery extends Array {
 	 */
 	after(nodes) {
 		for(let node of this) {
-			if(node === node.parentNode.lastChild) {
-				toNodes(node, nodes, n => node.parentNode.appendChild(n));
-			}
+			if(node === node.parentNode.lastChild) toNodes(
+				node.parentNode, nodes, n => node.parentNode.appendChild(n)
+			);
 			else toNodes(
-				node, nodes, n => node.parentNode.insertBefore(n, node.nextSibling)
+				node.parentNode, nodes,
+				n => node.parentNode.insertBefore(n, node.nextSibling)
 			);
 		}
 		return this;
@@ -126,9 +127,9 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	before(nodes) {
-		for(let node of this) {
-			toNodes(node, nodes, n => node.parentNode.insertBefore(n, node));
-		}
+		for(let node of this) toNodes(
+			node.parentNode, nodes, n => node.parentNode.insertBefore(n, node)
+		);
 		return this;
 	}
 
@@ -336,6 +337,13 @@ export class ShadowQuery extends Array {
 	 */
 	query(selector) {return new ShadowQuery(find(this, selector));}
 
+	/** Removes matched elements from DOM
+	  * @return {ShadowQuery} */
+	remove() {
+		for(const node of this) node.parentElement.removeChild(node);
+		return this;
+	}
+
 	/** remove a CSS-class from all selected nodes; uses classList.remove
 	 * @param {string} className - the class to remove
 	 * @return {ShadowQuery} this for chaining calls
@@ -387,12 +395,19 @@ export class ShadowQuery extends Array {
 	 */
 	text(t) {
 		if(!arguments.length) {
-			return this[0] && this[0].childNodes[0] &&
-				this[0].childNodes[0].nodeValue;
+			return this[0] && this[0].firstChild && (
+				(
+					(this[0].firstChild.nodeType === Node.TEXT_NODE) &&
+					this[0].firstChild.nodeValue
+				) || textNode(this[0]).nodeValue
+			);
 		}
-		for(let node of this) {if(node.childNodes[0]) {
-			node.childNodes[0].nodeValue = t;
-		}}
+		for(let node of this) {
+			if(node.firstChild && (node.firstChild.nodeType === Node.TEXT_NODE)) {
+				node.firstChild.nodeValue = t;
+			}
+			else textNode(node, true).nodeValue = t;
+		}
 		return this;
 	}
 
@@ -429,6 +444,9 @@ export default shadowQuery;
 const $ = shadowQuery;
 
 function toNodes(parent, nodes, callback) {
+	if(nodes instanceof HTMLTemplateElement) {
+		return callback(nodes.content.cloneNode(true));
+	}
 	if(nodes instanceof Node) return callback(nodes);
 	if(nodes.constructor === Object) nodes = shadowQuery.template(nodes);
 	if(typeof(nodes) === 'function') {
@@ -445,17 +463,34 @@ function find(coll, selector) {
 		if(/:host/.test(selector)) for(let sel of selector.split(',')) {
 			if(/^\s*:host\s*/.test(sel)) {
 				sel = sel.replace(/^\s*:host\s*/, '');
-				const host = coll[i].host || coll[i];
+				let host = coll[i].host || coll[i];
+				if(typeof(host) === 'string') host = coll[i];
 				if(/[^\s]/.test(sel)) nodes.push(...host.querySelectorAll(sel));
 				else nodes.push(host);
 			}
 			else nodes.push(...coll[i].querySelectorAll(sel));
 		}
-		else nodes.push(...coll[i].querySelectorAll(selector));
+		else if(coll[i].querySelectorAll) {
+			nodes.push(...coll[i].querySelectorAll(selector));
+		}
 	}
 	return nodes;
 }
 
+function textNode(node, force) {
+	for(let i = 0; i < node.childNodes.length; i++) {
+		if(node.childNodes[i].nodeType === Node.TEXT_NODE) {
+			return node.childNodes[i];
+		}
+	}
+	if(force) {
+		if(console.warn) console.warn(`ShadowQuery is creating a text node. \
+For performance reason you should put the text node into your DOM from the \
+start (e.g. as an empty space or zero width space "&#8203;")`);
+		node.appendChild(document.createTextNode(''));
+		return node.lastChild;
+	}
+}
 
 // /////// Events //////////
 
@@ -507,6 +542,29 @@ function onProp(node, evt, noself, callback) {
 	if(!node[pKey]) node[pKey] = {listener: []};
 	node[pKey].listener.push(noself ? noSelf(callback) : callback);
 	const key = evt.replace(/^prop:/, '');
+	if(
+		(node instanceof HTMLInputElement) &&
+		((key === 'value') || (key === 'checked'))
+	) onInputValueChange(node, key, pKey, evt);
+	else onPropertyChange(node, key, pKey);
+}
+function onInputValueChange(node, key, pKey, evt) {
+	switch(key) {
+		case 'value':
+			node.addEventListener('change', () => {
+				node[pKey].value = node.value;
+				tell(node, node[pKey], evt)
+			});
+			break;
+		case 'checked':
+			node.addEventListener('change', () => {
+				node[pKey].checked = node.checked;
+				tell(node, node[pKey], evt)
+			});
+			break;
+	}
+}
+function onPropertyChange(node, key, pKey, evt) {
 	if(node.hasOwnProperty(key)) {
 		node[pKey].value = node[key];
 		delete node[key];
@@ -602,6 +660,9 @@ shadowQuery.template = function(template) {
 		templates[template] = tmpl;
 		return tmpl.content.cloneNode(true);
 	}
+	else if(template instanceof HTMLTemplateElement) {
+		return template.content.cloneNode(true);
+	}
 	else return dynTemplate(template);
 };
 
@@ -648,7 +709,7 @@ function dynTemplate(template) {
 			let currentNode = parent[dynNodeKey][idx];
 			if(!currentNode) {
 				const tmp = $.template(tmpl);
-				currentNode = $(tmp.children);
+				currentNode = $(tmp.childNodes);
 				callback(tmp);
 				parent[dynNodeKey].push(currentNode);
 			}
