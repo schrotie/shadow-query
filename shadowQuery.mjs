@@ -49,7 +49,7 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	addClass(className) {
-		for(let node of this) node.classList.add(className);
+		for(const node of this) node.classList.add(className);
 		return this;
 	}
 
@@ -62,14 +62,16 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	after(nodes) {
-		for(let node of this) {
-			if(node === node.parentNode.lastChild) toNodes(
-				node.parentNode, nodes, n => node.parentNode.appendChild(n)
-			);
-			else toNodes(
-				node.parentNode, nodes,
-				n => node.parentNode.insertBefore(n, node.nextSibling)
-			);
+		for(const node of this) {
+			const parent = node.parentNode;
+			if(node === parent.lastChild) {
+				toNodes(parent, nodes, n => parent.appendChild(n));
+			}
+			else {
+				toNodes(
+					parent, nodes, n => parent.insertBefore(n, node.nextSibling)
+				);
+			}
 		}
 		return this;
 	}
@@ -83,7 +85,7 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	append(nodes) {
-		for(let node of this) toNodes(node, nodes, n => node.appendChild(n));
+		for(const node of this) toNodes(node, nodes, n => node.appendChild(n));
 		return this;
 	}
 
@@ -109,11 +111,11 @@ export class ShadowQuery extends Array {
 	attr(name, value) {
 		if(arguments.length === 1) return this[0] && this[0].getAttribute(name);
 		if((value === undefined) || (value === false)) {
-			for(let node of this) node.removeAttribute(name);
+			for(const node of this) node.removeAttribute(name);
 		}
 		else {
 			if(typeof(value) !== 'string') value = JSON.stringify(value);
-			for(let node of this) node.setAttribute(name, value);
+			for(const node of this) node.setAttribute(name, value);
 		}
 		return this;
 	}
@@ -127,9 +129,11 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	before(nodes) {
-		for(let node of this) toNodes(
-			node.parentNode, nodes, n => node.parentNode.insertBefore(n, node)
-		);
+		for(const node of this) {
+			toNodes(
+				node.parentNode, nodes, n => node.parentNode.insertBefore(n, node)
+			);
+		}
 		return this;
 	}
 
@@ -139,7 +143,9 @@ export class ShadowQuery extends Array {
 	 * @return {bool} true if found, else undefined
 	 */
 	hasClass(className) {
-		for(let node of this) if(node.classList.contains(className)) return true;
+		for(const node of this) {
+			if(node.classList.contains(className)) return true;
+		}
 		return false;
 	}
 
@@ -154,7 +160,7 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining
 	 */
 	off(evt, callback) {
-		for(let node of this) {
+		for(const node of this) {
 			if(/^attr:/.test(evt)) {
 				try{node[obsKey(attrFilter(evt))][callback].disconnect();}
 				catch(e) {}
@@ -164,9 +170,11 @@ export class ShadowQuery extends Array {
 				try{node[obsKey(textFilter())][callback].disconnect();}
 				catch(e) {}
 			}
-			else node.removeEventListener(
-				evt, callback._shadowQueryNoSelf || callback
-			);
+			else {
+				node.removeEventListener(
+					evt, callback._shadowQueryNoSelf || callback
+				);
+			}
 		}
 		return this;
 	}
@@ -245,7 +253,7 @@ export class ShadowQuery extends Array {
 	on(evt, noSelfOrCallback, callback) {
 		const noself = (arguments.length === 3)&&(noSelfOrCallback === 'noSelf');
 		if(arguments.length === 2) callback = noSelfOrCallback;
-		for(let node of this) {
+		for(const node of this) {
 			if(/^text:$/.test(evt)) observer(node, noself, callback, textFilter());
 			else if(/^attr:/.test(evt)) {
 				observer(node, noself, callback, attrFilter(evt));
@@ -272,7 +280,7 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining
 	 */
 	once(evt, callback) {
-		for(let node of this) {
+		for(const node of this) {
 			if(/^text:$/.test(evt)) onceObserver(node, callback, textFilter());
 			else if(/^attr:/.test(evt)) {
 				onceObserver(node, callback, attrFilter(evt));
@@ -292,7 +300,7 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	prepend(nodes) {
-		for(let node of this) {
+		for(const node of this) {
 			if(node.firstChild) {
 				toNodes(node, nodes, n => node.insertBefore(n, node.firstChild));
 			}
@@ -322,8 +330,8 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery|any} this for chaining or property value
 	 */
 	prop(name, value) {
-		if(arguments.length === 1) return this[0][name];
-		for(let node of this) node[name] = value;
+		if(arguments.length === 1) return this[0] && this[0][name];
+		for(const node of this) node[name] = value;
 		return this;
 	}
 
@@ -349,7 +357,7 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining calls
 	 */
 	removeClass(className) {
-		for(let node of this) node.classList.remove(className);
+		for(const node of this) node.classList.remove(className);
 		return this;
 	}
 
@@ -369,7 +377,7 @@ export class ShadowQuery extends Array {
 	 * @return {ShadowQuery} this for chaining
 	 */
 	shadow(template, options = {mode: 'open'}) {
-		for(let node of this) {
+		for(const node of this) {
 			const s = node.attachShadow(options);
 			if(template) s.appendChild($.template(template));
 		}
@@ -402,7 +410,7 @@ export class ShadowQuery extends Array {
 				) || textNode(this[0]).nodeValue
 			);
 		}
-		for(let node of this) {
+		for(const node of this) {
 			if(node.firstChild && (node.firstChild.nodeType === Node.TEXT_NODE)) {
 				node.firstChild.nodeValue = t;
 			}
@@ -420,11 +428,11 @@ export class ShadowQuery extends Array {
 	 */
 	toggleClass(className, state) {
 		if(arguments.length === 1) {
-			for(let node of this) node.classList.toggle(className);
+			for(const node of this) node.classList.toggle(className);
 		}
 		else {
 			state = state ? true : false;
-			for(let node of this) node.classList.toggle(className, state);
+			for(const node of this) node.classList.toggle(className, state);
 		}
 		return this;
 	}
@@ -454,13 +462,13 @@ function toNodes(parent, nodes, callback) {
 		else return callback(nodes());
 	}
 	if(!(nodes instanceof Array)) nodes = new ShadowQuery(nodes);
-	for(let node of nodes) callback(node);
+	for(const node of nodes) callback(node);
 }
 
 function find(coll, selector) {
 	const nodes = [];
 	for(let i = 0; i < coll.length; i++) {
-		if(/:host/.test(selector)) for(let sel of selector.split(',')) {
+		if(/:host/.test(selector)) {for(let sel of selector.split(',')) {
 			if(/^\s*:host\s*/.test(sel)) {
 				sel = sel.replace(/^\s*:host\s*/, '');
 				let host = coll[i].host || coll[i];
@@ -469,7 +477,7 @@ function find(coll, selector) {
 				else nodes.push(host);
 			}
 			else nodes.push(...coll[i].querySelectorAll(sel));
-		}
+		}}
 		else if(coll[i].querySelectorAll) {
 			nodes.push(...coll[i].querySelectorAll(selector));
 		}
@@ -484,9 +492,12 @@ function textNode(node, force) {
 		}
 	}
 	if(force) {
-		if(console.warn) console.warn(`ShadowQuery is creating a text node. \
+		if(console.warn) { // eslint-disable-line no-console
+			// eslint-disable-next-line no-console
+			console.warn(`ShadowQuery is creating a text node. \
 For performance reason you should put the text node into your DOM from the \
 start (e.g. as an empty space or zero width space "&#8203;")`);
+		}
 		node.appendChild(document.createTextNode(''));
 		return node.lastChild;
 	}
@@ -546,33 +557,41 @@ function onProp(node, evt, noself, callback) {
 		(node instanceof HTMLInputElement) &&
 		((key === 'value') || (key === 'checked'))
 	) onInputValueChange(node, key, pKey, evt);
-	else onPropertyChange(node, key, pKey);
+	else if((node instanceof HTMLSelectElement) && (key === 'value')) {
+		onInputValueChange(node, key, pKey, evt);
+	}
+	onPropertyChange(node, key, pKey);
 }
 function onInputValueChange(node, key, pKey, evt) {
 	switch(key) {
-		case 'value':
-			node.addEventListener('change', () => {
-				node[pKey].value = node.value;
-				tell(node, node[pKey], evt)
-			});
-			break;
-		case 'checked':
-			node.addEventListener('change', () => {
-				node[pKey].checked = node.checked;
-				tell(node, node[pKey], evt)
-			});
-			break;
+	case 'value':
+		node.addEventListener('change', () => {
+			node[pKey].value = node.value;
+			tell(node, node[pKey], evt);
+		});
+		break;
+	case 'checked':
+		node.addEventListener('change', () => {
+			node[pKey].checked = node.checked;
+			tell(node, node[pKey], evt);
+		});
+		break;
 	}
 }
 function onPropertyChange(node, key, pKey, evt) {
-	if(node.hasOwnProperty(key)) {
+	if(Object.prototype.hasOwnProperty.call(node, key)) {
 		node[pKey].value = node[key];
 		delete node[key];
 	}
+	const originalProperty = htmlElementProperty(node, key);
 	Object.defineProperty(node, key, {
-		get: function() {return node[pKey].value;},
+		get: function() {
+			if(originalProperty) return originalProperty.get.call(this);
+			return node[pKey].value;
+		},
 		set: function(value) {
-			node[pKey].value = value;
+			if(originalProperty) originalProperty.set.call(this, value);
+			else node[pKey].value = value;
 			tell(node, node[pKey], evt);
 			return value;
 		},
@@ -580,9 +599,18 @@ function onPropertyChange(node, key, pKey, evt) {
 		configurable: true,
 	});
 }
+function htmlElementProperty(node, key) {
+	try {
+		return Object.getOwnPropertyDescriptor(
+			Object.getPrototypeOf(node), key
+		);
+	} catch(e) {return undefined;}
+
+}
+
 function propKey(prop) {return `_shadowQueryProp${prop}`;}
 function tell(node, prop, evt) {
-	for(let listener of prop.listener) listener(prop.value, node, evt);
+	for(const listener of prop.listener) listener(prop.value, node, evt);
 }
 
 function noSelf(callback, async) {
@@ -656,7 +684,7 @@ shadowQuery.template = function(template) {
 		}
 		const tmpl = document.createElement('template');
 		tmpl.innerHTML = template;
-	// document.body.appendChild(tmpl);
+		// document.body.appendChild(tmpl);
 		templates[template] = tmpl;
 		return tmpl.content.cloneNode(true);
 	}
@@ -678,10 +706,11 @@ function dynTemplate(template) {
 			delete parent[timeoutKey];
 		}
 		if(!parent[dynNodeKey]) parent[dynNodeKey] =  [];
-		let nodes =  parent[dynNodeKey];
-		if(template.hasOwnProperty('condition') && !template.condition) {
-			return removeNodes(0);
-		}
+		const nodes =  parent[dynNodeKey];
+		if(
+			Object.prototype.hasOwnProperty.call(template, 'condition') &&
+			!template.condition
+		) return removeNodes(0);
 		else if(nodes.length > array.length) removeNodes(array.length);
 		iterDynNodeChunk(0);
 
