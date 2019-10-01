@@ -579,7 +579,9 @@ function onInputValueChange(node, key, pKey, evt) {
 	}
 }
 function onPropertyChange(node, key, pKey, evt) {
-	if(Object.prototype.hasOwnProperty.call(node, key)) {
+	if(Object.prototype.hasOwnProperty.call(node, key) ||
+		(node[key] !== undefined)
+	) {
 		node[pKey].value = node[key];
 		delete node[key];
 	}

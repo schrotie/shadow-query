@@ -1,3 +1,7 @@
+0.0.21
+
+Bugfix HTML-input event listeners
+
 0.0.19
 Several bugfixes and improvements:
 * "after" and "before" methods fixed
