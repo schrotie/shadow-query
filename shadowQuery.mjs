@@ -605,6 +605,8 @@ function htmlElementProperty(node, key) {
 	try {
 		return Object.getOwnPropertyDescriptor(
 			Object.getPrototypeOf(node), key
+		) ||   Object.getOwnPropertyDescriptor(
+			Object.getPrototypeOf(Object.getPrototypeOf(node)), key
 		);
 	} catch(e) {return undefined;}
 
