@@ -1,5 +1,7 @@
-0.0.21
+0.0.22
+Bugfix processDynNodes.name mangled by some uglifiers
 
+0.0.21
 Bugfix HTML-input event listeners
 
 0.0.19

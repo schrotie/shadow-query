@@ -458,7 +458,7 @@ function toNodes(parent, nodes, callback) {
 	if(nodes instanceof Node) return callback(nodes);
 	if(nodes.constructor === Object) nodes = shadowQuery.template(nodes);
 	if(typeof(nodes) === 'function') {
-		if(nodes.name == 'processDynNodes') return nodes(parent, callback);
+		if(isProcessDynNodes(nodes)) return nodes(parent, callback);
 		else return callback(nodes());
 	}
 	if(!(nodes instanceof Array)) nodes = new ShadowQuery(nodes);
@@ -696,13 +696,14 @@ shadowQuery.template = function(template) {
 	else return dynTemplate(template);
 };
 
+let processDynNodesRef;
 function dynTemplate(template) {
 	const {array = [undefined], chunks, id = 'default', update} = template;
 	const tmpl = template.template;
 	const dynNodeKey = `_shadowQueryChildArrayDynNode${id}`;
 	const timeoutKey = `_shadowQueryChildArrayTimeout${id}`;
 
-	return function processDynNodes(parent, callback) {
+	function processDynNodes(parent, callback) {
 		if(parent[timeoutKey]) {
 			clearTimeout(parent[timeoutKey]);
 			delete parent[timeoutKey];
@@ -748,5 +749,12 @@ function dynTemplate(template) {
 			delete parent[timeoutKey];
 			iterDynNodeChunk(++idx);
 		}
-	};
+	}
+	processDynNodesRef = processDynNodes.prototype.constructor;
+	return processDynNodes;
+}
+
+function isProcessDynNodes(node) {
+	return processDynNodesRef && node && node.prototype &&
+		(node.prototype.constructor === processDynNodesRef);
 }
