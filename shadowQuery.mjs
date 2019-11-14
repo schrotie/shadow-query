@@ -532,7 +532,8 @@ function obsKey(opt) {return `_shadowQueryObserver${JSON.stringify(opt)}`;}
 function offProp(node, evt, callback) {
 	if(!node[propKey(evt)]) return;
 	const listener = node[propKey(evt)].listener;
-	listener.splice(listener.indexOf(callback._shadowQueryNoSelf||callback), 1);
+	const idx = listener.indexOf(callback._shadowQueryNoSelf||callback);
+	if(idx !== -1) listener.splice(idx, 1);
 	if(listener.length) return;
 	const value = node[propKey(evt)].value;
 	delete node[propKey(evt)];
@@ -563,14 +564,18 @@ function onProp(node, evt, noself, callback) {
 	onPropertyChange(node, key, pKey);
 }
 function onInputValueChange(node, key, pKey, evt) {
+	const eKey = `${pKey}-Listener`;
+	if(node[eKey]) return;
 	switch(key) {
 	case 'value':
+		node[eKey] = true;
 		node.addEventListener('change', () => {
 			node[pKey].value = node.value;
 			tell(node, node[pKey], evt);
 		});
 		break;
 	case 'checked':
+		node[eKey] = true;
 		node.addEventListener('change', () => {
 			node[pKey].checked = node.checked;
 			tell(node, node[pKey], evt);
