@@ -1,3 +1,7 @@
+0.0.24
+Bugfix HTML-input event listeners: multiple subscibers -> multiple callbacks
+Bugfix off: would remove random listener when not subscribed
+
 0.0.23
 Bugfix HTML-input event listeners
 
