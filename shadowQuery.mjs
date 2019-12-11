@@ -551,8 +551,11 @@ function onceProp(node, evt, callback) {
 }
 function onProp(node, evt, noself, callback) {
 	const pKey = propKey(evt);
+	let initialized;
 	if(!node[pKey]) node[pKey] = {listener: []};
+	else initialized = true;
 	node[pKey].listener.push(noself ? noSelf(callback) : callback);
+	if(initialized) return;
 	const key = evt.replace(/^prop:/, '');
 	if(
 		(node instanceof HTMLInputElement) &&
