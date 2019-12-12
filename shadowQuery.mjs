@@ -600,7 +600,10 @@ function onPropertyChange(node, key, pKey, evt) {
 			return node[pKey].value;
 		},
 		set: function(value) {
-			if(originalProperty) originalProperty.set.call(this, value);
+			if(originalProperty) {
+				originalProperty.set.call(this, value);
+				node[pKey].value = originalProperty.get.call(this);
+			}
 			else node[pKey].value = value;
 			tell(node, node[pKey], evt);
 			return value;
