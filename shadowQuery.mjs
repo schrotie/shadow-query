@@ -407,7 +407,7 @@ export class ShadowQuery extends Array {
 				(
 					(this[0].firstChild.nodeType === Node.TEXT_NODE) &&
 					this[0].firstChild.nodeValue
-				) || textNode(this[0])
+				) || (textNode(this[0]) && textNode(this[0]).nodeValue)
 			);
 		}
 		for(const node of this) {
