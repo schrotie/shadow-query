@@ -110,7 +110,7 @@ export class ShadowQuery extends Array {
 	 */
 	attr(name, value) {
 		if(arguments.length === 1) return this[0] && this[0].getAttribute(name);
-		if((value === undefined) || (value === false)) {
+		if((value === undefined) || (value === false) || (value === null)) {
 			for(const node of this) node.removeAttribute(name);
 		}
 		else {

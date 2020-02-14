@@ -1,3 +1,6 @@
+0.0.29
+Setting attribute to null unsets it like setting it to undefined or false
+
 0.0.28
 Bugfix .text() on an element where text is not first-child return text-node
 instead of text
