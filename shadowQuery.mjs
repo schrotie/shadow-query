@@ -614,11 +614,11 @@ function onPropertyChange(node, key, pKey, evt) {
 }
 function htmlElementProperty(node, key) {
 	try {
-		return Object.getOwnPropertyDescriptor(
-			Object.getPrototypeOf(node), key
-		) ||   Object.getOwnPropertyDescriptor(
-			Object.getPrototypeOf(Object.getPrototypeOf(node)), key
-		);
+		while(node) {
+			node = Object.getPrototypeOf(node);
+			const prop = Object.getOwnPropertyDescriptor(node, key);
+			if(prop) return prop;
+		}
 	} catch(e) {return undefined;}
 
 }

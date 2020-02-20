@@ -1,3 +1,8 @@
+0.0.30
+When trying to get native property descriptors (for correct change detection
+on input and other native elements), now walks up arbitrary inheritance
+chains instead of just up to two levels.
+
 0.0.29
 Setting attribute to null unsets it like setting it to undefined or false
 
