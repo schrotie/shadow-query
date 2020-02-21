@@ -24,6 +24,7 @@ ShadowQuery module.
         * [.shadow([template], [options])](#module_shadowQuery.ShadowQuery+shadow) ⇒ <code>ShadowQuery</code>
         * [.text([t])](#module_shadowQuery.ShadowQuery+text) ⇒ <code>ShadowQuery</code> \| <code>string</code>
         * [.toggleClass(className, [state])](#module_shadowQuery.ShadowQuery+toggleClass) ⇒ <code>ShadowQuery</code>
+        * [.when(evt)](#module_shadowQuery.ShadowQuery+when) ⇒ <code>Promise</code>
     * [.shadowQuery(node, [selector])](#module_shadowQuery.shadowQuery) ⇒ <code>ShadowQuery</code>
     * [.template(template)](#module_shadowQuery.template) ⇒ <code>DocumentFragment</code> \| <code>dynTemplate</code>
 
@@ -59,6 +60,7 @@ or do whatever you like to it.
     * [.shadow([template], [options])](#module_shadowQuery.ShadowQuery+shadow) ⇒ <code>ShadowQuery</code>
     * [.text([t])](#module_shadowQuery.ShadowQuery+text) ⇒ <code>ShadowQuery</code> \| <code>string</code>
     * [.toggleClass(className, [state])](#module_shadowQuery.ShadowQuery+toggleClass) ⇒ <code>ShadowQuery</code>
+    * [.when(evt)](#module_shadowQuery.ShadowQuery+when) ⇒ <code>Promise</code>
 
 
 * * *
@@ -276,14 +278,20 @@ $(this, ':host').on(
 	'attr:hello',
 	this._onHelloAtributeChange.bind(this)
 );
+// shorthand:
+$(this, ':host').on('@hello', this._onHelloAtributeChange.bind(this));
 $(this, ':host').on(
 	'prop:hello',
 	this._onHelloPropertyChange.bind(this)
 );
+// shorthand:
+$(this, ':host').on('.hello', this._onHelloPropertyChange.bind(this));
 $(this, 'label').on(
 	'text:',
 	this._onLabelTextChange.bind(this)
 );
+// shorthand:
+$(this, 'label').on('§',      this._onLabelTextChange.bind(this));
 ```
 
 * * *
@@ -467,6 +475,24 @@ toggle a CSS-class on all selected nodes; uses classList.toggle
 | --- | --- | --- |
 | className | <code>string</code> | the class to toggle |
 | [state] | <code>bool</code> | if true [addClass](#module_shadowQuery.ShadowQuery+addClass), if false [removeClass](#module_shadowQuery.ShadowQuery+removeClass) |
+
+
+* * *
+
+<a name="module_shadowQuery.ShadowQuery+when"></a>
+
+#### shadowQuery.when(evt) ⇒ <code>Promise</code>
+Alternative to
+[ShadowQuery.once](#module_shadowQuery.ShadowQuery+once)
+for promise based programming . Same syntax as once, but does not accept
+callback, instead returns a promise (not "this" as most other messages!)
+that resolves when the event occurs.
+
+**Kind**: instance method of [<code>ShadowQuery</code>](#module_shadowQuery.ShadowQuery)  
+
+| Param | Type |
+| --- | --- |
+| evt | <code>Event</code> | 
 
 
 * * *

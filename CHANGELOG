@@ -1,3 +1,7 @@
+0.0.31
+* Event handlers now accept shorthands for attr: (@), prop: (.) & text: (§)
+* added method when for promise based programming
+
 0.0.30
 When trying to get native property descriptors (for correct change detection
 on input and other native elements), now walks up arbitrary inheritance

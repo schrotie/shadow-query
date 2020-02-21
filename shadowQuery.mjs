@@ -9,6 +9,9 @@
  * @module shadowQuery
  */
 
+const aExp = /^(attr:)|@/;
+const pExp = /^(prop:)|\./;
+const tExp = /^((text:)|§)$/;
 
 /**
  * ShadowQuery Class. It extends Array, the elements being the nodes
@@ -161,12 +164,12 @@ export class ShadowQuery extends Array {
 	 */
 	off(evt, callback) {
 		for(const node of this) {
-			if(/^attr:/.test(evt)) {
+			if(aExp.test(evt)) {
 				try{node[obsKey(attrFilter(evt))][callback].disconnect();}
 				catch(e) {}
 			}
-			else if(/^prop:/.test(evt)) offProp(node, evt, callback);
-			else if(/^text:/.test(evt)) {
+			else if(pExp.test(evt)) offProp(node, evt, callback);
+			else if(tExp.test(evt)) {
 				try{node[obsKey(textFilter())][callback].disconnect();}
 				catch(e) {}
 			}
@@ -233,14 +236,20 @@ export class ShadowQuery extends Array {
 	 * 	'attr:hello',
 	 * 	this._onHelloAtributeChange.bind(this)
 	 * );
+	 * // shorthand:
+	 * $(this, ':host').on('@hello', this._onHelloAtributeChange.bind(this));
 	 * $(this, ':host').on(
 	 * 	'prop:hello',
 	 * 	this._onHelloPropertyChange.bind(this)
 	 * );
+	 * // shorthand:
+	 * $(this, ':host').on('.hello', this._onHelloPropertyChange.bind(this));
 	 * $(this, 'label').on(
 	 * 	'text:',
 	 * 	this._onLabelTextChange.bind(this)
 	 * );
+	 * // shorthand:
+	 * $(this, 'label').on('§',      this._onLabelTextChange.bind(this));
 	 * @param {String} evt event name to pass to addEventListener. To listen
 	 * to attribute changes do 'attr:name'. This will create a MutationObserver
 	 * for changes of the attribute called 'name'. For properties `prop:name`,
@@ -254,11 +263,11 @@ export class ShadowQuery extends Array {
 		const noself = (arguments.length === 3)&&(noSelfOrCallback === 'noSelf');
 		if(arguments.length === 2) callback = noSelfOrCallback;
 		for(const node of this) {
-			if(/^text:$/.test(evt)) observer(node, noself, callback, textFilter());
-			else if(/^attr:/.test(evt)) {
+			if(tExp.test(evt)) observer(node, noself, callback, textFilter());
+			else if(aExp.test(evt)) {
 				observer(node, noself, callback, attrFilter(evt));
 			}
-			else if(/^prop:/.test(evt)) onProp(node, evt, noself, callback);
+			else if(pExp.test(evt)) onProp(node, evt, noself, callback);
 			else node.addEventListener(evt, noself ? noSelf(callback) : callback);
 		}
 		return this;
@@ -281,11 +290,11 @@ export class ShadowQuery extends Array {
 	 */
 	once(evt, callback) {
 		for(const node of this) {
-			if(/^text:$/.test(evt)) onceObserver(node, callback, textFilter());
-			else if(/^attr:/.test(evt)) {
+			if(tExp.test(evt)) onceObserver(node, callback, textFilter());
+			else if(aExp.test(evt)) {
 				onceObserver(node, callback, attrFilter(evt));
 			}
-			else if(/^prop:/.test(evt)) onceProp(node, evt, callback);
+			else if(pExp.test(evt)) onceProp(node, evt, callback);
 			else node.addEventListener(evt, callback, {once: true});
 		}
 		return this;
@@ -436,6 +445,15 @@ export class ShadowQuery extends Array {
 		}
 		return this;
 	}
+
+	/** Alternative to
+	 * {@link module:shadowQuery.ShadowQuery#once ShadowQuery.once}
+	 * for promise based programming . Same syntax as once, but does not accept
+	 * callback, instead returns a promise (not "this" as most other messages!)
+	 * that resolves when the event occurs.
+	 * @param {Event} evt
+	 * @return {Promise} */
+	when(evt) {return new Promise(resolve => this.once(evt, resolve));}
 }
 
 /** Instantiate a ShadowQuery object. See {@link module:shadowQuery.ShadowQuery}
@@ -506,7 +524,7 @@ start (e.g. as an empty space or zero width space "&#8203;")`);
 // /////// Events //////////
 
 function attrFilter(evt) {
-	return {attributes: true, attributeFilter: [evt.replace(/^attr:/, '')]};
+	return {attributes: true, attributeFilter: [evt.replace(aExp, '')]};
 }
 function textFilter() {return {characterData: true, subtree:true};}
 
