@@ -47,6 +47,34 @@ export class ShadowQuery extends Array {
 		super(...array);
 	}
 
+	/** access the selected nodes' attributes, properties or text depending on
+	  * the leading character of the "key" parameter. This matches the syntax of
+	  * event handler methods!
+	  * @param {String} key MUST be @key, .key, or § to access attr, prop, or
+	  * text (see respective methods).
+	  * @param {any=} value if you pass a value will call setters
+	  * @return {any} if you pass a value will return this for chaining,
+	  * otherwise will return an array with the retrieved values. NOTE: this
+	  * differs from the attr, prop, and text methods which will return the
+	  * value of the first matched element!
+	*/
+	access(key, value) {
+		const [, method, name] = key.match(/^(.)(.*)$/);
+		const setter = arguments.length > 1;
+		switch(method) {
+		case '@': return setter ? this.attr(name, value) :
+			this.map(el => el.getAttribute(name));
+		case '.': return setter ? this.prop(name, value) :
+			this.map(el => el[name]);
+		case '§': return setter ? this.text(value) :
+			this.map(el => ((el.nodeType === Node.TEXT_NODE) && el.nodeValue) ||
+				(textNode(el) && textNode(el).nodeValue));
+		default: throw new Error(
+			'Key in calls to "access" must start with "@", ".", or "§"'
+		);
+		}
+	}
+
 	/** add a CSS-class to all selected nodes; uses classList.add
 	 * @param {string} className - the class to add
 	 * @return {ShadowQuery} this for chaining calls
@@ -137,6 +165,24 @@ export class ShadowQuery extends Array {
 				node.parentNode, nodes, n => node.parentNode.insertBefore(n, node)
 			);
 		}
+		return this;
+	}
+
+	/** calls the designated method on each selected element and returns an array
+	  * and return an array of the results.
+	  * @param {String} method method name
+	  * @param {any} args arguments passed to the method
+	  * @return {Array}
+	  */
+	call(method, ...args) {return this.map(el => el[method](...args));}
+
+	/** "Chainable Call", same as call but returns "this"
+	  * @param {String} method method name
+	  * @param {any} args arguments passed to the method
+	  * @return {ShadowQuery}
+	  */
+	ccall(method, ...args) {
+		for(const node of this) node[method](...args);
 		return this;
 	}
 
@@ -357,6 +403,11 @@ export class ShadowQuery extends Array {
 	/** Removes matched elements from DOM
 	  * @return {ShadowQuery} */
 	remove() {
+		const warning = 'remove method is deprecated and will be removed soon';
+		const alternative = 'use call("remove") instead';
+		const polyfill = '(and optionally use a polyfill for IE)';
+		// eslint-disable-next-line no-console
+		console.warn(`${warning}, ${alternative} ${polyfill}`);
 		for(const node of this) node.parentElement.removeChild(node);
 		return this;
 	}
@@ -555,7 +606,7 @@ function offProp(node, evt, callback) {
 	if(listener.length) return;
 	const value = node[propKey(evt)].value;
 	delete node[propKey(evt)];
-	const key = evt.replace(/^prop:/, '');
+	const key = evt.replace(pExp, '');
 	delete node[key];
 	node[key] = value;
 }
@@ -574,7 +625,7 @@ function onProp(node, evt, noself, callback) {
 	else initialized = true;
 	node[pKey].listener.push(noself ? noSelf(callback) : callback);
 	if(initialized) return;
-	const key = evt.replace(/^prop:/, '');
+	const key = evt.replace(pExp, '');
 	if(
 		(node instanceof HTMLInputElement) &&
 		((key === 'value') || (key === 'checked'))

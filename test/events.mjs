@@ -60,6 +60,17 @@ describe('events', () => {
 		attr();
 	});
 
+	it('registers an attribute listener with "@"', done => {
+		$(foo()).on('@data-test', () => done());
+		attr();
+	});
+
+	it('catches attribute removal', done => {
+		attr();
+		$(foo()).on('attr:data-test', () => done());
+		foo().removeAttribute('data-test');
+	});
+
 	it('unregisters an attribute listener', done => {
 		$(foo()).on( 'attr:data-test', done);
 		$(foo()).off('attr:data-test', done);
@@ -93,6 +104,11 @@ describe('events', () => {
 
 	it('registers a text listener', done => {
 		$(foo()).on('text:', () => done());
+		text();
+	});
+
+	it('registers a text listener with "§"', done => {
+		$(foo()).on('§', () => done());
 		text();
 	});
 
@@ -137,6 +153,11 @@ describe('events', () => {
 
 	it('registers a property listener', done => {
 		$(foo()).on('prop:testProp', () => done());
+		prop();
+	});
+
+	it('registers a property listener with "."', done => {
+		$(foo()).on('.testProp', () => done());
 		prop();
 	});
 

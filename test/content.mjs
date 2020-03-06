@@ -22,8 +22,18 @@ describe('content', () => {
 		$(test(), 'span').text().should.equal('foo');
 	});
 
+	it('reads texts with §', () => {
+		foo().childNodes[0].nodeValue.should.equal('foo');
+		$(test(), 'span').access('§').should.deep.equal(['foo', 'bar']);
+	});
+
 	it('sets text', () => {
 		$(foo()).text('baz');
+		foo().childNodes[0].nodeValue.should.equal('baz');
+	});
+
+	it('sets text with §', () => {
+		$(foo()).access('§', 'baz');
 		foo().childNodes[0].nodeValue.should.equal('baz');
 	});
 
@@ -39,8 +49,18 @@ describe('content', () => {
 		$(test(), 'span').attr('data-test').should.equal('foo');
 	});
 
+	it('reads attributes with @', () => {
+		foo().getAttribute('data-test').should.equal('foo');
+		$(test(), 'span').access('@data-test').should.deep.equal(['foo', 'bar']);
+	});
+
 	it('sets attribute', () => {
 		$(foo()).attr('data-test', 'baz');
+		foo().getAttribute('data-test').should.equal('baz');
+	});
+
+	it('sets attribute with @', () => {
+		$(foo()).access('@data-test', 'baz');
 		foo().getAttribute('data-test').should.equal('baz');
 	});
 
@@ -69,8 +89,18 @@ describe('content', () => {
 		$(test(), 'span').prop('testProp').should.equal('foo');
 	});
 
+	it('reads properties with .', () => {
+		foo().testProp.should.equal('foo');
+		$(test(), 'span').access('.testProp').should.deep.equal(['foo', 'bar']);
+	});
+
 	it('sets property', () => {
 		$(foo()).prop('testProp', 'baz');
+		foo().testProp.should.equal('baz');
+	});
+
+	it('sets property with .', () => {
+		$(foo()).access('.testProp', 'baz');
 		foo().testProp.should.equal('baz');
 	});
 
@@ -78,5 +108,12 @@ describe('content', () => {
 		$(test(), 'span').prop('testProp', 'baz');
 		foo().testProp.should.equal('baz');
 		bar().testProp.should.equal('baz');
+	});
+
+	it('calls a method with arguments', () => {
+		$(test(), 'span').call('matches', 'span').should.deep.equal([true, true]);
+		$(test(), 'span').ccall('remove').access('.nodeName')
+			.should.deep.equal(['SPAN', 'SPAN']);
+		$(test(), 'span').length.should.equal(0);
 	});
 });

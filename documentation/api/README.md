@@ -7,11 +7,14 @@ ShadowQuery module.
 * [shadowQuery](#module_shadowQuery)
     * [.ShadowQuery](#module_shadowQuery.ShadowQuery)
         * [new exports.ShadowQuery(node, [selector])](#new_module_shadowQuery.ShadowQuery_new)
+        * [.access(key, [value])](#module_shadowQuery.ShadowQuery+access) ⇒ <code>any</code>
         * [.addClass(className)](#module_shadowQuery.ShadowQuery+addClass) ⇒ <code>ShadowQuery</code>
         * [.after(nodes)](#module_shadowQuery.ShadowQuery+after) ⇒ <code>ShadowQuery</code>
         * [.append(nodes)](#module_shadowQuery.ShadowQuery+append) ⇒ <code>ShadowQuery</code>
         * [.attr(name, [value])](#module_shadowQuery.ShadowQuery+attr) ⇒ <code>ShadowQuery</code> \| <code>string</code>
         * [.before(nodes)](#module_shadowQuery.ShadowQuery+before) ⇒ <code>ShadowQuery</code>
+        * [.call(method, ...args)](#module_shadowQuery.ShadowQuery+call) ⇒ <code>Array</code>
+        * [.ccall(method, ...args)](#module_shadowQuery.ShadowQuery+ccall) ⇒ <code>ShadowQuery</code>
         * [.hasClass(className)](#module_shadowQuery.ShadowQuery+hasClass) ⇒ <code>bool</code>
         * [.off(evt, callback)](#module_shadowQuery.ShadowQuery+off) ⇒ <code>ShadowQuery</code>
         * [.on(evt, noSelfOrCallback, [callback])](#module_shadowQuery.ShadowQuery+on) ⇒ <code>ShadowQuery</code>
@@ -43,11 +46,14 @@ or do whatever you like to it.
 
 * [.ShadowQuery](#module_shadowQuery.ShadowQuery)
     * [new exports.ShadowQuery(node, [selector])](#new_module_shadowQuery.ShadowQuery_new)
+    * [.access(key, [value])](#module_shadowQuery.ShadowQuery+access) ⇒ <code>any</code>
     * [.addClass(className)](#module_shadowQuery.ShadowQuery+addClass) ⇒ <code>ShadowQuery</code>
     * [.after(nodes)](#module_shadowQuery.ShadowQuery+after) ⇒ <code>ShadowQuery</code>
     * [.append(nodes)](#module_shadowQuery.ShadowQuery+append) ⇒ <code>ShadowQuery</code>
     * [.attr(name, [value])](#module_shadowQuery.ShadowQuery+attr) ⇒ <code>ShadowQuery</code> \| <code>string</code>
     * [.before(nodes)](#module_shadowQuery.ShadowQuery+before) ⇒ <code>ShadowQuery</code>
+    * [.call(method, ...args)](#module_shadowQuery.ShadowQuery+call) ⇒ <code>Array</code>
+    * [.ccall(method, ...args)](#module_shadowQuery.ShadowQuery+ccall) ⇒ <code>ShadowQuery</code>
     * [.hasClass(className)](#module_shadowQuery.ShadowQuery+hasClass) ⇒ <code>bool</code>
     * [.off(evt, callback)](#module_shadowQuery.ShadowQuery+off) ⇒ <code>ShadowQuery</code>
     * [.on(evt, noSelfOrCallback, [callback])](#module_shadowQuery.ShadowQuery+on) ⇒ <code>ShadowQuery</code>
@@ -82,6 +88,27 @@ as selector.
 | --- | --- | --- |
 | node | <code>Node</code> \| <code>Array.&lt;Node&gt;</code> \| <code>NodeList</code> \| <code>ShadowQuery</code> \| <code>String</code> | the initial node(s) |
 | [selector] | <code>String</code> | if passed will query node(s) with selector |
+
+
+* * *
+
+<a name="module_shadowQuery.ShadowQuery+access"></a>
+
+#### shadowQuery.access(key, [value]) ⇒ <code>any</code>
+access the selected nodes' attributes, properties or text depending on
+the leading character of the "key" parameter. This matches the syntax of
+event handler methods!
+
+**Kind**: instance method of [<code>ShadowQuery</code>](#module_shadowQuery.ShadowQuery)  
+**Returns**: <code>any</code> - if you pass a value will return this for chaining,
+otherwise will return an array with the retrieved values. NOTE: this
+differs from the attr, prop, and text methods which will return the
+value of the first matched element!  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | MUST be @key, .key, or § to access attr, prop, or text (see respective methods). |
+| [value] | <code>any</code> | if you pass a value will call setters |
 
 
 * * *
@@ -173,6 +200,37 @@ Insert DOM before all selected nodes
 | Param | Type | Description |
 | --- | --- | --- |
 | nodes | <code>Node</code> \| <code>Array.&lt;Node&gt;</code> \| <code>ShadowQuery</code> \| <code>String</code> \| <code>$.template</code> | DOM to insert; String will be transformed by calling $.template $.template is the result of a call to [$.template](#module_shadowQuery.template) |
+
+
+* * *
+
+<a name="module_shadowQuery.ShadowQuery+call"></a>
+
+#### shadowQuery.call(method, ...args) ⇒ <code>Array</code>
+calls the designated method on each selected element and returns an array
+and return an array of the results.
+
+**Kind**: instance method of [<code>ShadowQuery</code>](#module_shadowQuery.ShadowQuery)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| method | <code>String</code> | method name |
+| ...args | <code>any</code> | arguments passed to the method |
+
+
+* * *
+
+<a name="module_shadowQuery.ShadowQuery+ccall"></a>
+
+#### shadowQuery.ccall(method, ...args) ⇒ <code>ShadowQuery</code>
+"Chainable Call", same as call but returns "this"
+
+**Kind**: instance method of [<code>ShadowQuery</code>](#module_shadowQuery.ShadowQuery)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| method | <code>String</code> | method name |
+| ...args | <code>any</code> | arguments passed to the method |
 
 
 * * *
