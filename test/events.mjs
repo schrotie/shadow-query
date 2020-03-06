@@ -205,4 +205,37 @@ describe('events', () => {
 		$(foo()).off('text:',          dummy);
 		done();
 	});
+
+	it('promisifies events', () => {
+		const promise = $(foo()).when('.testProp');
+		foo().testProp = 'test';
+		return promise;
+	});
+
+	it('emits a CustomEvent', done => {
+		$(foo()).on('custom', evt => {
+			evt.should.be.instanceof(CustomEvent);
+			done();
+		}).emit('custom');
+	});
+
+	it('emits a CustomEvent with detail', done => {
+		$(foo()).on('custom', ({detail}) => {
+			detail.should.equal('test');
+			done();
+		}).emit('custom', {detail: 'test'});
+	});
+
+	it('emits a UIEvent', done => {
+		const event = new UIEvent('custom');
+		$(foo()).on('custom', evt => {
+			evt.should.equal(event);
+			done();
+		}).emit(event);
+	});
+
+	it('fails on invalid emit call', () => {
+		const f = () => $(foo()).emit(new UIEvent('bar'), {detail: 'baz'});
+		f.should.throw(Error);
+	});
 });

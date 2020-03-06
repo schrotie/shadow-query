@@ -186,6 +186,24 @@ export class ShadowQuery extends Array {
 		return this;
 	}
 
+	/** calls dispatchEvent selected element
+	  * @param {Event|String} event if String will emit CustomEvent, optionally
+	  * with customEventInit, otherwise emits event as passed
+	  * @param {Object=} customEventInit use to initialize CustomEvent,
+	  * only if event is String
+	  * @return {ShadowQuery}
+	*/
+	emit(event, customEventInit) {
+		if((event instanceof Event) && customEventInit) throw new Error(
+			'EITHER pass an Event instance OR optionally pass customEventInit'
+		);
+		if(typeof(event) == 'string') {
+			event = new CustomEvent(event, customEventInit || {});
+		}
+		for(const node of this) node.dispatchEvent(event);
+		return this;
+	}
+
 	/** check if a selected element has the designated CSS-class ;
 	 * uses classList.contains
 	 * @param {string} className - the class to check

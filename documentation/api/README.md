@@ -15,6 +15,7 @@ ShadowQuery module.
         * [.before(nodes)](#module_shadowQuery.ShadowQuery+before) ⇒ <code>ShadowQuery</code>
         * [.call(method, ...args)](#module_shadowQuery.ShadowQuery+call) ⇒ <code>Array</code>
         * [.ccall(method, ...args)](#module_shadowQuery.ShadowQuery+ccall) ⇒ <code>ShadowQuery</code>
+        * [.emit(event, [customEventInit])](#module_shadowQuery.ShadowQuery+emit) ⇒ <code>ShadowQuery</code>
         * [.hasClass(className)](#module_shadowQuery.ShadowQuery+hasClass) ⇒ <code>bool</code>
         * [.off(evt, callback)](#module_shadowQuery.ShadowQuery+off) ⇒ <code>ShadowQuery</code>
         * [.on(evt, noSelfOrCallback, [callback])](#module_shadowQuery.ShadowQuery+on) ⇒ <code>ShadowQuery</code>
@@ -54,6 +55,7 @@ or do whatever you like to it.
     * [.before(nodes)](#module_shadowQuery.ShadowQuery+before) ⇒ <code>ShadowQuery</code>
     * [.call(method, ...args)](#module_shadowQuery.ShadowQuery+call) ⇒ <code>Array</code>
     * [.ccall(method, ...args)](#module_shadowQuery.ShadowQuery+ccall) ⇒ <code>ShadowQuery</code>
+    * [.emit(event, [customEventInit])](#module_shadowQuery.ShadowQuery+emit) ⇒ <code>ShadowQuery</code>
     * [.hasClass(className)](#module_shadowQuery.ShadowQuery+hasClass) ⇒ <code>bool</code>
     * [.off(evt, callback)](#module_shadowQuery.ShadowQuery+off) ⇒ <code>ShadowQuery</code>
     * [.on(evt, noSelfOrCallback, [callback])](#module_shadowQuery.ShadowQuery+on) ⇒ <code>ShadowQuery</code>
@@ -231,6 +233,21 @@ and return an array of the results.
 | --- | --- | --- |
 | method | <code>String</code> | method name |
 | ...args | <code>any</code> | arguments passed to the method |
+
+
+* * *
+
+<a name="module_shadowQuery.ShadowQuery+emit"></a>
+
+#### shadowQuery.emit(event, [customEventInit]) ⇒ <code>ShadowQuery</code>
+calls dispatchEvent selected element
+
+**Kind**: instance method of [<code>ShadowQuery</code>](#module_shadowQuery.ShadowQuery)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| event | <code>Event</code> \| <code>String</code> | if String will emit CustomEvent, optionally with customEventInit, otherwise emits event as passed |
+| [customEventInit] | <code>Object</code> | use to initialize CustomEvent, only if event is String |
 
 
 * * *

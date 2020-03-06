@@ -1,3 +1,7 @@
+0.0.33
+* added emit method to simplify event emission
+* added tests
+
 0.0.32
 * added "access" method (event-handler syntax compatible alias for attr, prop, text)
 * added "call" and "ccall" methods - parsimonious replacement for "remove"

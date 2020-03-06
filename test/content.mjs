@@ -43,6 +43,12 @@ describe('content', () => {
 		bar().childNodes[0].nodeValue.should.equal('baz');
 	});
 
+	it('sets text on empty element', () => {
+		test().innerHTML = '<span></span>';
+		$(test(), 'span').text('foo');
+		test().childNodes[0].childNodes[0].nodeValue.should.equal('foo');
+	});
+
 
 	it('reads first attribute', () => {
 		foo().getAttribute('data-test').should.equal('foo');
@@ -108,6 +114,11 @@ describe('content', () => {
 		$(test(), 'span').prop('testProp', 'baz');
 		foo().testProp.should.equal('baz');
 		bar().testProp.should.equal('baz');
+	});
+
+	it('fails on invalid access call', () => {
+		const f = () => $(foo()).access('testProp', 'baz');
+		f.should.throw(Error);
 	});
 
 	it('calls a method with arguments', () => {
