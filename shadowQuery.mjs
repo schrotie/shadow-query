@@ -617,14 +617,15 @@ function obsKey(opt) {return `_shadowQueryObserver${JSON.stringify(opt)}`;}
 
 // TODO property handlers should handle getters/setter on the node prototype
 function offProp(node, evt, callback) {
-	if(!node[propKey(evt)]) return;
-	const listener = node[propKey(evt)].listener;
+	const key = evt.replace(pExp, '');
+	const pKey = propKey(key);
+	if(!node[pKey]) return;
+	const listener = node[pKey].listener;
 	const idx = listener.indexOf(callback._shadowQueryNoSelf||callback);
 	if(idx !== -1) listener.splice(idx, 1);
 	if(listener.length) return;
-	const value = node[propKey(evt)].value;
-	delete node[propKey(evt)];
-	const key = evt.replace(pExp, '');
+	const value = node[pKey].value;
+	delete node[pKey];
 	delete node[key];
 	node[key] = value;
 }
@@ -637,13 +638,13 @@ function onceProp(node, evt, callback) {
 	}
 }
 function onProp(node, evt, noself, callback) {
-	const pKey = propKey(evt);
+	const key = evt.replace(pExp, '');
+	const pKey = propKey(key);
 	let initialized;
 	if(!node[pKey]) node[pKey] = {listener: []};
 	else initialized = true;
 	node[pKey].listener.push(noself ? noSelf(callback) : callback);
 	if(initialized) return;
-	const key = evt.replace(pExp, '');
 	if(
 		(node instanceof HTMLInputElement) &&
 		((key === 'value') || (key === 'checked'))

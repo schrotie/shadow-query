@@ -1,3 +1,6 @@
+0.0.34
+* Bugfix mixing prop:value and .value style event-handlers
+
 0.0.33
 * added emit method to simplify event emission
 * added tests
