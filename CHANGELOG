@@ -1,3 +1,6 @@
+0.0.35
+* linking index.mjs -> shadowQuery.mjs for painless rollup imports
+
 0.0.34
 * Bugfix mixing prop:value and .value style event-handlers
 
