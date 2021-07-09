@@ -1,3 +1,6 @@
+0.0.37
+* index.mjs is copy instead of link
+
 0.0.36
 * adding index.mjs link to package
 
