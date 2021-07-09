@@ -1,3 +1,6 @@
+0.0.36
+* adding index.mjs link to package
+
 0.0.35
 * linking index.mjs -> shadowQuery.mjs for painless rollup imports
 

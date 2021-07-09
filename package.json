@@ -1,6 +1,6 @@
 {
 	"name": "shadow-query",
-	"version": "0.0.35",
+	"version": "0.0.36",
 	"license": "MIT",
 	"author": {
 		"name": "Thorsten Roggendorf",
@@ -19,6 +19,7 @@
 	},
 	"files": [
 		"documentation/**",
+		"index.mjs",
 		"shadowQuery.mjs",
 		"shadowQuery.min.mjs"
 	],
