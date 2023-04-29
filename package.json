@@ -41,7 +41,7 @@
 		"eslint-config-google": "^0.7.1",
 		"eslint-plugin-html": "^1.7.0",
 		"jsdoc": "latest",
-		"jsdoc-to-markdown": "^4.0.1",
+		"jsdoc-to-markdown": "^8.0.0",
 		"mocha": "latest",
 		"mocha-headless-chrome": "latest",
 		"serve": "latest",
